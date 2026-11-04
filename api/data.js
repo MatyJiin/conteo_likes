@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const token = process.env.META_TOKEN || "EAAQ2m5P4VKUBSZBiZAkjWHvvGsi1WfRM6NZBSggcU7kriM08Qolr2pL4IDE8jenbVbjeTmwyQZAI30rRt3xCeMV9eytAstmNqCCM9B8iN0nU8g2bB0GM5ZBWz8BbYFAiu0ZC2sNj6PT6cM8trTsvQk5EKvShg5Aycwq0PzPx4aIrh6h6g7PVJp8mO0TBKSOFodi8lzzsjt3IzGP9Kb4trk4A7LYaQOUCIjnHvJ";
+const token = process.env.META_TOKEN || "EAAQ2m5P4VKUBSZBouT9THRX1b4NqxL30qSW4uB05AEERBsvL1qBZAX0wYSMuWzlfRDnaXGtSeNSrapRMVFlUDxfZBrvfkon65Wv0jII3MON88AZBrmmDxUe0oZC179wOPUH5aPuqoZCq5L1R5aaVqER6zRaoRQyDDoEqLlc20QBpZC2NbpEGzwdAoBSK0Pi71ucbZBE08UDIsLqfgh8z0dGzpqBH31dFS7wrZC35cSPCoIL5NDWv03nDvpIRRyfoydWILCKksMGrydQXizdEQUqeSXhAuPkEZD";
 const igId = "17841436768752867";
 
 const namesMap = {
