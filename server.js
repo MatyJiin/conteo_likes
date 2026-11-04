@@ -103,12 +103,13 @@ updateFromMetaApi();
 const mimeTypes = {
   '.html': 'text/html; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
+  '.js': 'application/javascript; charset=utf-8',
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.png': 'image/png',
   '.webp': 'image/webp',
   '.csv': 'text/csv; charset=utf-8',
-  '.css': 'text/css'
+  '.css': 'text/css; charset=utf-8'
 };
 
 const server = http.createServer((req, res) => {
