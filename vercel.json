@@ -1,8 +1,4 @@
 {
   "version": 2,
-  "cleanUrls": true,
-  "rewrites": [
-    { "source": "/api/data", "destination": "/conteo_resultados.json" }
-  ]
+  "cleanUrls": true
 }
-

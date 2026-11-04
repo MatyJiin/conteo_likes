@@ -29,12 +29,12 @@ let memoryCache = {
   data: null,
   timestamp: 0
 };
-const CACHE_TTL_MS = 25000; // 25 segundos
+const CACHE_TTL_MS = 10000; // 10 segundos para máxima frescura
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  // Vercel Edge CDN guardará el resultado por 25s para miles de usuarios simultáneos
-  res.setHeader('Cache-Control', 's-maxage=25, stale-while-revalidate=60');
+  // Vercel Edge CDN guardará el resultado por 10s para miles de usuarios simultáneos
+  res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate=20');
 
   const now = Date.now();
 
