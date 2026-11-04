@@ -54,6 +54,12 @@ let currentData = [];
 if (fs.existsSync('conteo_resultados.json')) {
   try {
     currentData = JSON.parse(fs.readFileSync('conteo_resultados.json', 'utf8'));
+    currentData.forEach(item => {
+      const code = item.shortcode || item.url.split('/p/')[1].replace(/\//g, '');
+      item.shortcode = code;
+      item.name = namesMap[code] || item.name || 'PARTICIPANTE';
+      item.localImage = `fotos/${code}.jpg`;
+    });
   } catch (e) {
     currentData = [];
   }
