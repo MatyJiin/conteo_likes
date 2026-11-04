@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 const token = process.env.META_TOKEN || "EAAQ2m5P4VKUBSZBiZAkjWHvvGsi1WfRM6NZBSggcU7kriM08Qolr2pL4IDE8jenbVbjeTmwyQZAI30rRt3xCeMV9eytAstmNqCCM9B8iN0nU8g2bB0GM5ZBWz8BbYFAiu0ZC2sNj6PT6cM8trTsvQk5EKvShg5Aycwq0PzPx4aIrh6h6g7PVJp8mO0TBKSOFodi8lzzsjt3IzGP9Kb4trk4A7LYaQOUCIjnHvJ";
 const igId = "17841436768752867";
 
@@ -21,9 +24,28 @@ const namesMap = {
   'DfTQQT-OWM0': 'RENATA ARRIAGADA'
 };
 
+// Caché en memoria compartido por instancia serverless (Anti-Rate-Limit)
+let memoryCache = {
+  data: null,
+  timestamp: 0
+};
+const CACHE_TTL_MS = 25000; // 25 segundos
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Cache-Control', 's-maxage=5, stale-while-revalidate=10');
+  // Vercel Edge CDN guardará el resultado por 25s para miles de usuarios simultáneos
+  res.setHeader('Cache-Control', 's-maxage=25, stale-while-revalidate=60');
+
+  const now = Date.now();
+
+  // 1. Si tenemos datos en caché válidos de hace menos de 25s, responder al instante
+  if (memoryCache.data && (now - memoryCache.timestamp) < CACHE_TTL_MS) {
+    return res.status(200).json({
+      data: memoryCache.data,
+      lastUpdate: memoryCache.timestamp,
+      source: 'memory_cache'
+    });
+  }
 
   try {
     const url = `https://graph.facebook.com/v21.0/${igId}/media?fields=id,shortcode,like_count,comments_count,permalink,media_url,thumbnail_url&limit=50&access_token=${token}`;
@@ -55,14 +77,47 @@ module.exports = async (req, res) => {
 
     contestants.sort((a, b) => b.likes - a.likes);
 
+    // Actualizar caché en memoria
+    memoryCache = {
+      data: contestants,
+      timestamp: now
+    };
+
     return res.status(200).json({
       data: contestants,
-      lastUpdate: Date.now(),
+      lastUpdate: now,
       source: 'meta_official_api'
     });
   } catch (err) {
-    // Si falla, responder con datos cacheados
-    return res.status(500).json({ error: err.message });
+    console.error('Error Meta API:', err.message);
+
+    // ESCUDO DE SEGURIDAD: Si Meta se cae o da límite, usar caché anterior o archivo local
+    if (memoryCache.data) {
+      return res.status(200).json({
+        data: memoryCache.data,
+        lastUpdate: memoryCache.timestamp,
+        source: 'fallback_memory_cache',
+        warning: 'Servicio en caché temporal'
+      });
+    }
+
+    try {
+      const filePath = path.resolve(process.cwd(), 'conteo_resultados.json');
+      if (fs.existsSync(filePath)) {
+        const fileData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        return res.status(200).json({
+          data: fileData,
+          lastUpdate: now,
+          source: 'fallback_disk_file'
+        });
+      }
+    } catch (e) {}
+
+    return res.status(200).json({
+      data: [],
+      error: err.message,
+      source: 'error_fallback'
+    });
   }
 };
 

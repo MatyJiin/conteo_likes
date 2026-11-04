@@ -140,13 +140,49 @@
       });
   }
 
+  var REFRESH_INTERVAL = 20;
+  var countdown = REFRESH_INTERVAL;
+  var countdownTimer = null;
+  var isFetching = false;
+
+  function fetchLiveData() {
+    if (isFetching) return;
+    isFetching = true;
+
+    fetch("/api/data")
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        isFetching = false;
+        if (res && Array.isArray(res.data) && res.data.length > 0) {
+          render(res.data);
+          var timeEl = document.getElementById("statTime");
+          if (timeEl) {
+            var date = new Date(res.lastUpdate || Date.now());
+            timeEl.textContent = date.toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+          }
+        }
+      })
+      .catch(function() {
+        isFetching = false;
+        fetch("conteo_resultados.json?t=" + Date.now())
+          .then(function(r) { return r.json(); })
+          .then(function(items) { render(items); })
+          .catch(function() {
+            render(fallbackData);
+          });
+      });
+  }
+
   function startCountdown() {
     clearInterval(countdownTimer);
-    countdown = 15;
+    countdown = REFRESH_INTERVAL;
     countdownTimer = setInterval(function() {
+      // Si el usuario tiene la pestaña oculta, pausar el sondeo para ahorrar recursos
+      if (document.hidden) return;
+
       countdown--;
       if (countdown <= 0) {
-        countdown = 15;
+        countdown = REFRESH_INTERVAL;
         fetchLiveData();
       }
       var countEl = document.getElementById("statCountdown");
@@ -154,9 +190,18 @@
     }, 1000);
   }
 
+  // Reactivar de inmediato cuando el usuario vuelve a la pestaña
+  document.addEventListener("visibilitychange", function() {
+    if (!document.hidden && countdown > 5) {
+      fetchLiveData();
+    }
+  });
+
   var btnRefresh = document.getElementById("btnRefresh");
   if (btnRefresh) {
     btnRefresh.addEventListener("click", function() {
+      if (btnRefresh.classList.contains("loading")) return;
+
       btnRefresh.classList.add("loading");
       var icon = document.getElementById("refreshIcon");
       var text = document.getElementById("refreshText");
@@ -172,7 +217,7 @@
             if (icon) icon.textContent = "🔄";
             if (text) text.textContent = "Actualizar";
             startCountdown();
-          }, 500);
+          }, 400);
         });
     });
   }
@@ -181,7 +226,5 @@
   render(fallbackData);
   fetchLiveData();
   startCountdown();
-  // Sondeo de datos en vivo cada 6 segundos
-  setInterval(fetchLiveData, 6000);
 })();
 

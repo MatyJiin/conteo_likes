@@ -77,12 +77,6 @@ async function updateFromMetaApi() {
 
     fs.writeFileSync('conteo_resultados.json', JSON.stringify(currentData, null, 2));
 
-    let csv = "Ranking,Concursante,Likes (Votos Oficiales),Comentarios,Enlace\n";
-    currentData.forEach((item, idx) => {
-      csv += `${idx + 1},"${item.name}",${item.likes},${item.comments},"${item.url}"\n`;
-    });
-    fs.writeFileSync('conteo_likes.csv', '\uFEFF' + csv, 'utf8');
-
     console.log(`[${new Date().toLocaleTimeString('es-CL')}] Meta API: 17 concursantes actualizados en 0.2s.`);
   } catch (err) {
     console.error('Excepción al consultar Meta API:', err.message);
@@ -92,10 +86,10 @@ async function updateFromMetaApi() {
   return currentData;
 }
 
-// Consultar Meta API cada 15 segundos (oficial, rápido, sin bloqueos)
+// Consultar Meta API cada 20 segundos (seguro, estable, dentro del margen de Meta)
 setInterval(() => {
   updateFromMetaApi().catch(() => {});
-}, 15000);
+}, 20000);
 
 // Primera consulta inmediata
 updateFromMetaApi();
