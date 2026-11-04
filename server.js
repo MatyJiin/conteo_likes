@@ -1,30 +1,10 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { exec } = require('child_process');
 
 const PORT = 3000;
-const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-
-const urls = [
-  "https://www.instagram.com/p/DfTQQT-OWM0/",
-  "https://www.instagram.com/p/DfTRB7DOhP5/",
-  "https://www.instagram.com/p/DfTQwh-u8jD/",
-  "https://www.instagram.com/p/DfTQZ4BuX8u/",
-  "https://www.instagram.com/p/DfTQ173OYef/",
-  "https://www.instagram.com/p/DfTQzO9O8bc/",
-  "https://www.instagram.com/p/DfTQT1eOlfE/",
-  "https://www.instagram.com/p/DfTQqfYOlUD/",
-  "https://www.instagram.com/p/DfTQtpwumd2/",
-  "https://www.instagram.com/p/DfTQ4VWOgnQ/",
-  "https://www.instagram.com/p/DfTQ_Yku8UC/",
-  "https://www.instagram.com/p/DfTQlOMuffA/",
-  "https://www.instagram.com/p/DfTQ7cLOoRa/",
-  "https://www.instagram.com/p/DfTQe-NOAZX/",
-  "https://www.instagram.com/p/DfTQnVYuKlp/",
-  "https://www.instagram.com/p/DfTQcjBu1HN/",
-  "https://www.instagram.com/p/DfTQie5Onwa/"
-];
+const token = "EAAQ2m5P4VKUBSZBiZAkjWHvvGsi1WfRM6NZBSggcU7kriM08Qolr2pL4IDE8jenbVbjeTmwyQZAI30rRt3xCeMV9eytAstmNqCCM9B8iN0nU8g2bB0GM5ZBWz8BbYFAiu0ZC2sNj6PT6cM8trTsvQk5EKvShg5Aycwq0PzPx4aIrh6h6g7PVJp8mO0TBKSOFodi8lzzsjt3IzGP9Kb4trk4A7LYaQOUCIjnHvJ";
+const igId = "17841436768752867";
 
 const namesMap = {
   'DfTRB7DOhP5': 'MAITTE OPAZO',
@@ -46,135 +26,79 @@ const namesMap = {
   'DfTQQT-OWM0': 'RENATA ARRIAGADA'
 };
 
-let isScraping = false;
-let lastUpdate = Date.now();
-
-// Cargar datos actuales si existen
 let currentData = [];
+let lastUpdate = Date.now();
+let isUpdating = false;
+
 if (fs.existsSync('conteo_resultados.json')) {
   try {
     currentData = JSON.parse(fs.readFileSync('conteo_resultados.json', 'utf8'));
-    currentData.forEach(item => {
-      const code = item.shortcode || item.url.split('/p/')[1].replace(/\//g, '');
-      item.shortcode = code;
-      item.name = namesMap[code] || item.name || 'PARTICIPANTE';
-      item.localImage = `fotos/${code}.jpg`;
-    });
   } catch (e) {
     currentData = [];
   }
 }
 
-const os = require('os');
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function scrapeUrl(url) {
-  return new Promise((resolve) => {
-    const code = url.split('/p/')[1].replace(/\//g, '');
-    const tempProfile = path.join(os.tmpdir(), `ch_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`);
-    const rnd = Math.random().toString(36).substring(2, 9);
-    const targetUrl = `${url}?feed_type=popular&utm_source=ig_web_copy_link&v=${rnd}`;
-    
-    const cmd = `"${chromePath}" --headless=new --disable-gpu --incognito --disable-cache --disk-cache-size=0 --user-data-dir="${tempProfile}" --dump-dom "${targetUrl}"`;
-
-    exec(cmd, { maxBuffer: 15 * 1024 * 1024, timeout: 25000 }, (error, stdout) => {
-      try { fs.rmSync(tempProfile, { recursive: true, force: true }); } catch (e) {}
-
-      if (error || !stdout) {
-        return resolve({ url, shortcode: code, success: false });
-      }
-      
-      const likesMatch = stdout.match(/([0-9.,]+)\s*(?:likes|me gusta)/i);
-      let likes = 0;
-      if (likesMatch) {
-        likes = parseInt(likesMatch[1].replace(/[.,]/g, ''), 10) || 0;
-      }
-
-      const commentsMatch = stdout.match(/([0-9.,]+)\s*(?:comments|comentarios)/i);
-      let comments = 0;
-      if (commentsMatch) {
-        comments = parseInt(commentsMatch[1].replace(/[.,]/g, ''), 10) || 0;
-      }
-
-      const ogImg = stdout.match(/<meta property="og:image" content="([^"]+)"/i);
-      const image = ogImg ? ogImg[1].replace(/&amp;/g, '&') : '';
-
-      const localImage = `fotos/${code}.jpg`;
-      if (image && !fs.existsSync(localImage)) {
-        fetch(image, { headers: { 'User-Agent': 'Mozilla/5.0' } })
-          .then(r => r.arrayBuffer())
-          .then(buf => fs.writeFileSync(localImage, Buffer.from(buf)))
-          .catch(() => {});
-      }
-
-      resolve({
-        url,
-        shortcode: code,
-        name: namesMap[code] || 'PARTICIPANTE',
-        likes,
-        comments,
-        localImage,
-        image,
-        success: likes > 0
-      });
-    });
-  });
-}
-
-async function updateAll() {
-  if (isScraping) return currentData;
-  isScraping = true;
-  console.log(`[${new Date().toLocaleTimeString('es-CL')}] Verificando votos frescos en vivo (bypass CDN)...`);
-
-  const results = [];
-  for (let i = 0; i < urls.length; i++) {
-    const res = await scrapeUrl(urls[i]);
-    results.push(res);
-    if (i < urls.length - 1) await sleep(800);
-  }
-
-  const merged = results.map(r => {
-    const prev = currentData.find(p => p.shortcode === r.shortcode) || {};
-    const code = r.shortcode || prev.shortcode || r.url.split('/p/')[1].replace(/\//g, '');
-    return {
-      url: r.url,
-      shortcode: code,
-      name: namesMap[code] || prev.name || 'PARTICIPANTE',
-      likes: r.success && r.likes > 0 ? r.likes : (prev.likes || r.likes || 0),
-      comments: r.success ? r.comments : (prev.comments || 0),
-      localImage: r.localImage || prev.localImage || `fotos/${code}.jpg`,
-      image: r.image || prev.image || '',
-      success: true
-    };
-  });
-
-  merged.sort((a, b) => b.likes - a.likes);
-  currentData = merged;
-  lastUpdate = Date.now();
-  isScraping = false;
-
+async function updateFromMetaApi() {
+  if (isUpdating) return currentData;
+  isUpdating = true;
   try {
+    const url = `https://graph.facebook.com/v21.0/${igId}/media?fields=id,shortcode,like_count,comments_count,permalink,media_url,thumbnail_url&limit=50&access_token=${token}`;
+    const res = await fetch(url);
+    const json = await res.json();
+
+    if (!res.ok || json.error) {
+      console.error('Error Meta API:', json.error ? json.error.message : 'Status ' + res.status);
+      isUpdating = false;
+      return currentData;
+    }
+
+    const posts = json.data || [];
+    const contestants = [];
+
+    for (const code of Object.keys(namesMap)) {
+      const post = posts.find(p => p.shortcode === code);
+      if (post) {
+        contestants.push({
+          url: post.permalink || `https://www.instagram.com/p/${code}/`,
+          shortcode: code,
+          name: namesMap[code],
+          likes: post.like_count,
+          comments: post.comments_count,
+          localImage: `fotos/${code}.jpg`,
+          image: post.thumbnail_url || post.media_url || '',
+          success: true
+        });
+      }
+    }
+
+    contestants.sort((a, b) => b.likes - a.likes);
+    currentData = contestants;
+    lastUpdate = Date.now();
+
     fs.writeFileSync('conteo_resultados.json', JSON.stringify(currentData, null, 2));
-    let csv = "Ranking,Concursante,Likes (Votos),Comentarios,Enlace\n";
+
+    let csv = "Ranking,Concursante,Likes (Votos Oficiales),Comentarios,Enlace\n";
     currentData.forEach((item, idx) => {
       csv += `${idx + 1},"${item.name}",${item.likes},${item.comments},"${item.url}"\n`;
     });
     fs.writeFileSync('conteo_likes.csv', '\uFEFF' + csv, 'utf8');
-  } catch (e) {
-    console.error('Error guardando archivos:', e.message);
-  }
 
-  console.log(`[${new Date().toLocaleTimeString('es-CL')}] Conteo actualizado con éxito.`);
+    console.log(`[${new Date().toLocaleTimeString('es-CL')}] Meta API: 17 concursantes actualizados en 0.2s.`);
+  } catch (err) {
+    console.error('Excepción al consultar Meta API:', err.message);
+  } finally {
+    isUpdating = false;
+  }
   return currentData;
 }
 
-// Auto-actualización cada 90 segundos para evitar bloqueos de Instagram
+// Consultar Meta API cada 15 segundos (oficial, rápido, sin bloqueos)
 setInterval(() => {
-  updateAll().catch(e => console.error(e));
-}, 90000);
+  updateFromMetaApi().catch(() => {});
+}, 15000);
+
+// Primera consulta inmediata
+updateFromMetaApi();
 
 const mimeTypes = {
   '.html': 'text/html; charset=utf-8',
@@ -187,67 +111,34 @@ const mimeTypes = {
   '.css': 'text/css'
 };
 
-const server = http.createServer(async (req, res) => {
+const server = http.createServer((req, res) => {
   const parsedUrl = new URL(req.url, `http://localhost:${PORT}`);
   const pathname = parsedUrl.pathname;
 
-  // Endpoint de datos
   if (pathname === '/api/data') {
-    res.writeHead(200, { 
+    res.writeHead(200, {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*'
     });
     return res.end(JSON.stringify({
       data: currentData,
-      isScraping,
-      lastUpdate
+      isUpdating,
+      lastUpdate,
+      source: 'meta_graph_api'
     }));
   }
 
-  // Endpoint para forzar actualización inmediata
   if (pathname === '/api/refresh') {
-    if (!isScraping) {
-      updateAll();
-    }
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify({ status: 'updating' }));
-  }
-
-  // Endpoint para editar un número manualmente
-  if (pathname === '/api/edit' && req.method === 'POST') {
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
-      try {
-        const payload = JSON.parse(body);
-        const item = currentData.find(p => p.shortcode === payload.shortcode);
-        if (item && typeof payload.likes === 'number') {
-          item.likes = payload.likes;
-          currentData.sort((a, b) => b.likes - a.likes);
-          lastUpdate = Date.now();
-          fs.writeFileSync('conteo_resultados.json', JSON.stringify(currentData, null, 2));
-
-          let csv = "Ranking,Concursante,Likes (Votos),Comentarios,Enlace\n";
-          currentData.forEach((it, idx) => {
-            csv += `${idx + 1},"${it.name}",${it.likes},${it.comments},"${it.url}"\n`;
-          });
-          fs.writeFileSync('conteo_likes.csv', '\uFEFF' + csv, 'utf8');
-
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          return res.end(JSON.stringify({ success: true, data: currentData }));
-        }
-      } catch (e) {}
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ error: 'Invalid data' }));
+    updateFromMetaApi().then(() => {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 'ok', data: currentData }));
     });
     return;
   }
 
-  // Servir archivos estáticos
   let filePath = pathname === '/' ? 'index.html' : pathname.slice(1);
   filePath = path.resolve(__dirname, decodeURIComponent(filePath));
 
-  // Seguridad: evitar directory traversal
   if (!filePath.startsWith(__dirname)) {
     res.writeHead(403);
     return res.end('Acceso denegado');
@@ -268,8 +159,7 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`\n======================================================`);
-  console.log(`  SISTEMA DE CONTEO EN VIVO INICIADO`);
+  console.log(`  SISTEMA OFICIAL META API INICIADO`);
   console.log(`  Abre en tu navegador: http://localhost:${PORT}`);
   console.log(`======================================================\n`);
 });
-

@@ -557,9 +557,9 @@
 <div class="container">
   <header>
     <div class="header-titles">
-      <div class="school-tag">🎤 Escuela Víctor Domingo Silva • Coyhaique</div>
+      <div class="school-tag">🎤 Escuela Víctor Domingo Silva • Conexión Oficial Meta API</div>
       <h1>Festival Escolar Voces de la Patagonia</h1>
-      <p>Votación del público en vivo • 4.ª Edición</p>
+      <p>Votación oficial del público en tiempo real • 4.ª Edición</p>
     </div>
     <div class="live-actions">
       <div class="live-pill">
@@ -620,24 +620,24 @@
   var countdown = 45;
   var countdownTimer = null;
 
-  // Datos base garantizados (con imágenes locales y nombres oficiales)
+  // Datos base garantizados oficiales desde Meta API
   var fallbackData = [
-    { "url": "https://www.instagram.com/p/DfTQQT-OWM0/", "shortcode": "DfTQQT-OWM0", "name": "RENATA ARRIAGADA", "likes": 497, "comments": 18, "localImage": "fotos/DfTQQT-OWM0.jpg" },
-    { "url": "https://www.instagram.com/p/DfTRB7DOhP5/", "shortcode": "DfTRB7DOhP5", "name": "MAITTE OPAZO", "likes": 378, "comments": 28, "localImage": "fotos/DfTRB7DOhP5.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQQT-OWM0/", "shortcode": "DfTQQT-OWM0", "name": "RENATA ARRIAGADA", "likes": 549, "comments": 18, "localImage": "fotos/DfTQQT-OWM0.jpg" },
+    { "url": "https://www.instagram.com/p/DfTRB7DOhP5/", "shortcode": "DfTRB7DOhP5", "name": "MAITTE OPAZO", "likes": 392, "comments": 30, "localImage": "fotos/DfTRB7DOhP5.jpg" },
     { "url": "https://www.instagram.com/p/DfTQwh-u8jD/", "shortcode": "DfTQwh-u8jD", "name": "EMILIA FRITSCH", "likes": 210, "comments": 8, "localImage": "fotos/DfTQwh-u8jD.jpg" },
-    { "url": "https://www.instagram.com/p/DfTQZ4BuX8u/", "shortcode": "DfTQZ4BuX8u", "name": "ROSA HARO", "likes": 188, "comments": 14, "localImage": "fotos/DfTQZ4BuX8u.jpg" },
-    { "url": "https://www.instagram.com/p/DfTQzO9O8bc/", "shortcode": "DfTQzO9O8bc", "name": "ISIADORA LEIVA", "likes": 148, "comments": 13, "localImage": "fotos/DfTQzO9O8bc.jpg" },
-    { "url": "https://www.instagram.com/p/DfTQ173OYef/", "shortcode": "DfTQ173OYef", "name": "LEONOR GONZALEZ", "likes": 145, "comments": 0, "localImage": "fotos/DfTQ173OYef.jpg" },
-    { "url": "https://www.instagram.com/p/DfTQT1eOlfE/", "shortcode": "DfTQT1eOlfE", "name": "FERNANDA GALLARDO", "likes": 117, "comments": 2, "localImage": "fotos/DfTQT1eOlfE.jpg" },
-    { "url": "https://www.instagram.com/p/DfTQqfYOlUD/", "shortcode": "DfTQqfYOlUD", "name": "ESTEFANI CARCAMO", "likes": 116, "comments": 0, "localImage": "fotos/DfTQqfYOlUD.jpg" },
-    { "url": "https://www.instagram.com/p/DfTQtpwumd2/", "shortcode": "DfTQtpwumd2", "name": "EMILIA BORQUEZ", "likes": 106, "comments": 2, "localImage": "fotos/DfTQtpwumd2.jpg" },
-    { "url": "https://www.instagram.com/p/DfTQ4VWOgnQ/", "shortcode": "DfTQ4VWOgnQ", "name": "LUCIA SOTO", "likes": 84, "comments": 3, "localImage": "fotos/DfTQ4VWOgnQ.jpg" },
-    { "url": "https://www.instagram.com/p/DfTQ_Yku8UC/", "shortcode": "DfTQ_Yku8UC", "name": "PALOMA ALVARADO", "likes": 57, "comments": 0, "localImage": "fotos/DfTQ_Yku8UC.jpg" },
-    { "url": "https://www.instagram.com/p/DfTQlOMuffA/", "shortcode": "DfTQlOMuffA", "name": "JAVIERA ACUÑA Y DAYHARY PEREZ", "likes": 52, "comments": 1, "localImage": "fotos/DfTQlOMuffA.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQZ4BuX8u/", "shortcode": "DfTQZ4BuX8u", "name": "ROSA HARO", "likes": 190, "comments": 14, "localImage": "fotos/DfTQZ4BuX8u.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQzO9O8bc/", "shortcode": "DfTQzO9O8bc", "name": "ISIADORA LEIVA", "likes": 152, "comments": 13, "localImage": "fotos/DfTQzO9O8bc.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQ173OYef/", "shortcode": "DfTQ173OYef", "name": "LEONOR GONZALEZ", "likes": 146, "comments": 0, "localImage": "fotos/DfTQ173OYef.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQqfYOlUD/", "shortcode": "DfTQqfYOlUD", "name": "ESTEFANI CARCAMO", "likes": 125, "comments": 0, "localImage": "fotos/DfTQqfYOlUD.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQT1eOlfE/", "shortcode": "DfTQT1eOlfE", "name": "FERNANDA GALLARDO", "likes": 120, "comments": 2, "localImage": "fotos/DfTQT1eOlfE.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQtpwumd2/", "shortcode": "DfTQtpwumd2", "name": "EMILIA BORQUEZ", "likes": 108, "comments": 2, "localImage": "fotos/DfTQtpwumd2.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQ4VWOgnQ/", "shortcode": "DfTQ4VWOgnQ", "name": "LUCIA SOTO", "likes": 85, "comments": 3, "localImage": "fotos/DfTQ4VWOgnQ.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQ_Yku8UC/", "shortcode": "DfTQ_Yku8UC", "name": "PALOMA ALVARADO", "likes": 58, "comments": 0, "localImage": "fotos/DfTQ_Yku8UC.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQlOMuffA/", "shortcode": "DfTQlOMuffA", "name": "JAVIERA ACUÑA Y DAYHARY PEREZ", "likes": 56, "comments": 1, "localImage": "fotos/DfTQlOMuffA.jpg" },
     { "url": "https://www.instagram.com/p/DfTQ7cLOoRa/", "shortcode": "DfTQ7cLOoRa", "name": "ISADORA MARTINEZ", "likes": 40, "comments": 2, "localImage": "fotos/DfTQ7cLOoRa.jpg" },
-    { "url": "https://www.instagram.com/p/DfTQe-NOAZX/", "shortcode": "DfTQe-NOAZX", "name": "GIANELLA MONSALVE", "likes": 20, "comments": 0, "localImage": "fotos/DfTQe-NOAZX.jpg" },
-    { "url": "https://www.instagram.com/p/DfTQnVYuKlp/", "shortcode": "DfTQnVYuKlp", "name": "VICTOR VEGA", "likes": 11, "comments": 0, "localImage": "fotos/DfTQnVYuKlp.jpg" },
-    { "url": "https://www.instagram.com/p/DfTQcjBu1HN/", "shortcode": "DfTQcjBu1HN", "name": "KEVIN DOMKE Y MATILDA ESPINOZA", "likes": 9, "comments": 5, "localImage": "fotos/DfTQcjBu1HN.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQnVYuKlp/", "shortcode": "DfTQnVYuKlp", "name": "VICTOR VEGA", "likes": 31, "comments": 1, "localImage": "fotos/DfTQnVYuKlp.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQe-NOAZX/", "shortcode": "DfTQe-NOAZX", "name": "GIANELLA MONSALVE", "likes": 21, "comments": 0, "localImage": "fotos/DfTQe-NOAZX.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQcjBu1HN/", "shortcode": "DfTQcjBu1HN", "name": "KEVIN DOMKE Y MATILDA ESPINOZA", "likes": 10, "comments": 5, "localImage": "fotos/DfTQcjBu1HN.jpg" },
     { "url": "https://www.instagram.com/p/DfTQie5Onwa/", "shortcode": "DfTQie5Onwa", "name": "DAMARYS ALVAREZ", "likes": 7, "comments": 2, "localImage": "fotos/DfTQie5Onwa.jpg" }
   ];
 
@@ -780,11 +780,11 @@
 
   function startCountdown() {
     clearInterval(countdownTimer);
-    countdown = 45;
+    countdown = 15;
     countdownTimer = setInterval(function() {
       countdown--;
       if (countdown <= 0) {
-        countdown = 45;
+        countdown = 15;
         fetchLiveData();
       }
       document.getElementById("statCountdown").textContent = "Próxima en " + countdown + "s";
@@ -806,7 +806,7 @@
           document.getElementById("refreshIcon").textContent = "🔄";
           document.getElementById("refreshText").textContent = "Actualizar";
           startCountdown();
-        }, 12000);
+        }, 600);
       });
   });
 

@@ -1,13 +1,13 @@
 @echo off
 chcp 65001 > nul
 echo ========================================================
-echo   ACTUALIZANDO CONTEO DE LIKES EN VIVO (SIN CACHE)
+echo   ACTUALIZANDO CONTEO OFICIAL EN VIVO (META GRAPH API)
 echo ========================================================
 echo.
-node scrape_all_fresh.js
+node actualizar_api.js
 echo.
 echo ========================================================
-echo   ¡Listo! Conteo actualizado con los números reales.
+echo   ¡Listo! Conteo oficial actualizado desde Meta.
 echo ========================================================
 echo.
 pause
