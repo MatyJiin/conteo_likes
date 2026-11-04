@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Votación En Vivo - Festival Escolar Voces de la Patagonia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface-hover: #f1f5f9;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --line: #e2e8f0;
+    --primary: #ec4899;
+    --primary-light: #fdf2f8;
+    --primary-dark: #be185d;
+    --gold: #d97706;
+    --gold-bg: #fffbeb;
+    --gold-border: #fcd34d;
+    --silver: #475569;
+    --silver-bg: #f8fafc;
+    --silver-border: #cbd5e1;
+    --bronze: #b45309;
+    --bronze-bg: #fef3c7;
+    --bronze-border: #fde68a;
+    --ok: #10b981;
+    --ok-bg: #ecfdf5;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: linear-gradient(180deg, #f0fdf4 0%, #f8fafc 180px, #f8fafc 100%);
+    color: var(--text-main);
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+    padding: 24px 16px 80px;
+    min-height: 100vh;
+  }
+
+  .container { max-width: 980px; margin: 0 auto; }
+
+  /* Friendly Header */
+  header {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .school-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+  }
+
+  .header-titles h1 {
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+  }
+
+  .header-titles p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-top: 4px;
+  }
+
+  .live-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .live-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--ok-bg);
+    border: 1px solid #a7f3d0;
+    color: #047857;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .live-dot {
+    width: 10px;
+    height: 10px;
+    background: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #10b981;
+    animation: pulseLive 1.5s infinite;
+  }
+
+  @keyframes pulseLive {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.85); opacity: 0.4; }
+  }
+
+  .btn-refresh {
+    background: var(--surface);
+    color: #334155;
+    border: 1px solid var(--line);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  }
+
+  .btn-refresh:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #0f172a;
+  }
+
+  .btn-refresh.loading {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  /* Stats Bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 18px 22px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: #e2e8f0;
+  }
+
+  .stat-card.accent::after {
+    background: linear-gradient(90deg, #ec4899, #f43f5e);
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+  }
+
+  .stat-val {
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-top: 4px;
+    line-height: 1.1;
+  }
+
+  .stat-card.accent .stat-val {
+    background: linear-gradient(135deg, #db2777 0%, #e11d48 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .stat-meta {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin-top: 4px;
+  }
+
+  /* Section Titles */
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .section-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Podium (Top 3) */
+  .podium {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 18px;
+    margin-bottom: 38px;
+  }
+
+  .podium-card {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 24px 20px;
+    border: 2px solid var(--line);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .podium-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.07);
+  }
+
+  .podium-card.first {
+    border-color: var(--gold-border);
+    background: linear-gradient(180deg, #fffbeb 0%, #ffffff 130px);
+    order: 2;
+  }
+
+  .podium-card.second {
+    border-color: var(--silver-border);
+    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 130px);
+    order: 1;
+  }
+
+  .podium-card.third {
+    border-color: var(--bronze-border);
+    background: linear-gradient(180deg, #fefce8 0%, #ffffff 130px);
+    order: 3;
+  }
+
+  .podium-badge {
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+  }
+
+  .first .podium-badge {
+    background: #fef08a;
+    color: #854d0e;
+    border: 1px solid #fde047;
+  }
+
+  .second .podium-badge {
+    background: #e2e8f0;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+  }
+
+  .third .podium-badge {
+    background: #fed7aa;
+    color: #9a3412;
+    border: 1px solid #fdba74;
+  }
+
+  .podium-img-wrapper {
+    width: 140px;
+    height: 140px;
+    border-radius: 18px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    border: 3px solid var(--line);
+    background: #e2e8f0;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+  }
+
+  .first .podium-img-wrapper {
+    border-color: #f59e0b;
+    width: 155px;
+    height: 155px;
+  }
+
+  .podium-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .podium-likes {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #0f172a;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .podium-card.first .podium-likes {
+    color: #b45309;
+  }
+
+  .podium-comments {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+
+  .btn-ig {
+    background: #f1f5f9;
+    color: #334155;
+    text-decoration: none;
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    border: 1px solid var(--line);
+  }
+
+  .btn-ig:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+  }
+
+  /* Full Contestants List */
+  .contestants-list {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+  }
+
+  .contestant-row {
+    padding: 14px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid var(--line);
+    transition: background 0.2s ease;
+  }
+
+  .contestant-row:last-child {
+    border-bottom: 0;
+  }
+
+  .contestant-row:hover {
+    background: #f8fafc;
+  }
+
+  .contestant-row.bump {
+    animation: highlightBump 1.2s ease-out;
+  }
+
+  @keyframes highlightBump {
+    0% { background: #dcfce7; }
+    100% { background: var(--surface); }
+  }
+
+  .rank-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 800;
+    background: #f1f5f9;
+    color: #64748b;
+    flex-shrink: 0;
+  }
+
+  .top-1 .rank-badge { background: #fef08a; color: #854d0e; }
+  .top-2 .rank-badge { background: #e2e8f0; color: #334155; }
+  .top-3 .rank-badge { background: #fed7aa; color: #9a3412; }
+
+  .contestant-img {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: #f1f5f9;
+    border: 1px solid var(--line);
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  }
+
+  .contestant-info {
+    flex: 1;
+    min-width: 140px;
+  }
+
+  .contestant-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .post-code {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  .bar-container {
+    width: 100%;
+    height: 6px;
+    background: #f1f5f9;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+
+  .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ec4899, #f43f5e);
+    border-radius: 999px;
+    width: 0%;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .contestant-metrics {
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .contestant-likes {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.1;
+  }
+
+  .contestant-likes span {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #ec4899;
+  }
+
+  .contestant-comments {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .link-arrow {
+    color: #94a3b8;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .link-arrow:hover {
+    color: #0f172a;
+    background: #f1f5f9;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    margin-top: 36px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 600px) {
+    body { padding: 16px 12px 60px; }
+    header { padding: 18px 16px; border-radius: 16px; }
+    .header-titles h1 { font-size: 1.3rem; }
+    .contestant-row { padding: 12px 14px; gap: 10px; }
+    .contestant-img { width: 48px; height: 48px; }
+    .contestant-likes { font-size: 1.2rem; }
+    .rank-badge { width: 30px; height: 30px; font-size: 0.85rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="header-titles">
+      <div class="school-tag">🎤 Escuela Víctor Domingo Silva • Coyhaique</div>
+      <h1>Festival Escolar Voces de la Patagonia</h1>
+      <p>Votación del público en vivo • 4.ª Edición</p>
+    </div>
+    <div class="live-actions">
+      <div class="live-pill">
+        <span class="live-dot"></span>
+        <span>En Vivo</span>
+      </div>
+      <button id="btnRefresh" class="btn-refresh" type="button" title="Consultar votos ahora">
+        <span id="refreshIcon">🔄</span>
+        <span id="refreshText">Actualizar</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Tarjetas de Resumen -->
+  <div class="stats-bar">
+    <div class="stat-card accent">
+      <div class="stat-label">Total de Votos (Likes)</div>
+      <div id="statTotalLikes" class="stat-val">–</div>
+      <div class="stat-meta">Votos acumulados en Instagram</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Concursantes</div>
+      <div class="stat-val">17</div>
+      <div class="stat-meta">Artistas participantes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Líder del Concurso</div>
+      <div id="statLeader" class="stat-val">–</div>
+      <div id="statLeaderDiff" class="stat-meta">–</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Última Revisión</div>
+      <div id="statTime" class="stat-val" style="font-size: 1.5rem; padding-top: 4px;">–</div>
+      <div id="statCountdown" class="stat-meta">Próxima en 45s</div>
+    </div>
+  </div>
+
+  <!-- Podio Top 3 -->
+  <div class="section-header">
+    <div class="section-title">🏆 Podio de Líderes</div>
+  </div>
+  <section class="podium" id="podium"></section>
+
+  <!-- Tabla Completa (1 al 17) con fotos -->
+  <div class="section-header">
+    <div class="section-title">📋 Posiciones del 1 al 17 (Todos los concursantes)</div>
+  </div>
+  <section class="contestants-list" id="contestantsGrid"></section>
+
+  <footer>
+    <p>Festival Escolar Voces de la Patagonia • Conteo de votos en tiempo real</p>
+  </footer>
+</div>
+
+<script>
+(function() {
+  var previousLikesMap = {};
+  var countdown = 45;
+  var countdownTimer = null;
+
+  // Datos base garantizados (con imágenes locales y remotas)
+  var fallbackData = [
+    { "url": "https://www.instagram.com/p/DfTQQT-OWM0/", "shortcode": "DfTQQT-OWM0", "likes": 373, "comments": 17, "localImage": "fotos/DfTQQT-OWM0.jpg" },
+    { "url": "https://www.instagram.com/p/DfTRB7DOhP5/", "shortcode": "DfTRB7DOhP5", "likes": 355, "comments": 26, "localImage": "fotos/DfTRB7DOhP5.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQwh-u8jD/", "shortcode": "DfTQwh-u8jD", "likes": 200, "comments": 7, "localImage": "fotos/DfTQwh-u8jD.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQZ4BuX8u/", "shortcode": "DfTQZ4BuX8u", "likes": 184, "comments": 13, "localImage": "fotos/DfTQZ4BuX8u.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQ173OYef/", "shortcode": "DfTQ173OYef", "likes": 135, "comments": 0, "localImage": "fotos/DfTQ173OYef.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQzO9O8bc/", "shortcode": "DfTQzO9O8bc", "likes": 132, "comments": 12, "localImage": "fotos/DfTQzO9O8bc.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQT1eOlfE/", "shortcode": "DfTQT1eOlfE", "likes": 115, "comments": 2, "localImage": "fotos/DfTQT1eOlfE.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQqfYOlUD/", "shortcode": "DfTQqfYOlUD", "likes": 107, "comments": 0, "localImage": "fotos/DfTQqfYOlUD.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQtpwumd2/", "shortcode": "DfTQtpwumd2", "likes": 96, "comments": 2, "localImage": "fotos/DfTQtpwumd2.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQ4VWOgnQ/", "shortcode": "DfTQ4VWOgnQ", "likes": 82, "comments": 3, "localImage": "fotos/DfTQ4VWOgnQ.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQ_Yku8UC/", "shortcode": "DfTQ_Yku8UC", "likes": 55, "comments": 0, "localImage": "fotos/DfTQ_Yku8UC.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQlOMuffA/", "shortcode": "DfTQlOMuffA", "likes": 50, "comments": 1, "localImage": "fotos/DfTQlOMuffA.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQ7cLOoRa/", "shortcode": "DfTQ7cLOoRa", "likes": 38, "comments": 2, "localImage": "fotos/DfTQ7cLOoRa.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQe-NOAZX/", "shortcode": "DfTQe-NOAZX", "likes": 16, "comments": 0, "localImage": "fotos/DfTQe-NOAZX.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQnVYuKlp/", "shortcode": "DfTQnVYuKlp", "likes": 10, "comments": 0, "localImage": "fotos/DfTQnVYuKlp.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQcjBu1HN/", "shortcode": "DfTQcjBu1HN", "likes": 9, "comments": 5, "localImage": "fotos/DfTQcjBu1HN.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQie5Onwa/", "shortcode": "DfTQie5Onwa", "likes": 7, "comments": 2, "localImage": "fotos/DfTQie5Onwa.jpg" }
+  ];
+
+  function formatNumber(n) {
+    return (n || 0).toLocaleString("es-CL");
+  }
+
+  function render(items) {
+    if (!Array.isArray(items) || items.length === 0) return;
+
+    items.sort(function(a, b) { return b.likes - a.likes; });
+
+    var maxLikes = items[0].likes || 1;
+    var totalLikes = 0;
+    items.forEach(function(x) { totalLikes += (x.likes || 0); });
+
+    document.getElementById("statTotalLikes").textContent = formatNumber(totalLikes);
+    document.getElementById("statLeader").textContent = formatNumber(items[0].likes) + " likes";
+    if (items[1]) {
+      var diff = items[0].likes - items[1].likes;
+      document.getElementById("statLeaderDiff").textContent = "+" + diff + " sobre el 2° lugar";
+    }
+
+    // 1. Render Podio
+    var pod = document.getElementById("podium");
+    pod.innerHTML = "";
+    var podiumConfig = [
+      { idx: 1, class: "second", label: "🥈 2° Lugar" },
+      { idx: 0, class: "first", label: "🥇 1° Lugar" },
+      { idx: 2, class: "third", label: "🥉 3° Lugar" }
+    ];
+
+    podiumConfig.forEach(function(cfg) {
+      var item = items[cfg.idx];
+      if (!item) return;
+
+      var card = document.createElement("div");
+      card.className = "podium-card " + cfg.class;
+
+      var imgSrc = item.localImage || ("fotos/" + item.shortcode + ".jpg") || item.image;
+
+      card.innerHTML = 
+        '<div class="podium-badge">' + cfg.label + '</div>' +
+        '<div class="podium-img-wrapper">' +
+          '<img class="podium-img" src="' + imgSrc + '" alt="Concursante ' + (cfg.idx + 1) + '">' +
+        '</div>' +
+        '<div class="podium-likes">' + formatNumber(item.likes) + '</div>' +
+        '<div class="podium-comments">' + item.comments + ' comentarios</div>' +
+        '<a class="btn-ig" href="' + item.url + '" target="_blank">Ver publicación ↗</a>';
+
+      pod.appendChild(card);
+    });
+
+    // 2. Render Lista completa del 1 al 17
+    var grid = document.getElementById("contestantsGrid");
+    grid.innerHTML = "";
+
+    items.forEach(function(item, index) {
+      var rank = index + 1;
+      var row = document.createElement("div");
+      var rankClass = rank === 1 ? "top-1" : (rank === 2 ? "top-2" : (rank === 3 ? "top-3" : ""));
+      row.className = "contestant-row " + rankClass;
+
+      var prev = previousLikesMap[item.shortcode];
+      if (prev !== undefined && item.likes > prev) {
+        row.classList.add("bump");
+      }
+      previousLikesMap[item.shortcode] = item.likes;
+
+      var imgSrc = item.localImage || ("fotos/" + item.shortcode + ".jpg") || item.image;
+      var pct = Math.round((item.likes / maxLikes) * 100);
+
+      row.innerHTML = 
+        '<div class="rank-badge">#' + rank + '</div>' +
+        '<img class="contestant-img" src="' + imgSrc + '" alt="Participante ' + rank + '">' +
+        '<div class="contestant-info">' +
+          '<div class="contestant-title">' +
+            'Participante ' + rank +
+            '<span class="post-code">' + item.shortcode + '</span>' +
+          '</div>' +
+          '<div class="bar-container"><div class="bar-fill" style="width: ' + pct + '%"></div></div>' +
+        '</div>' +
+        '<div class="contestant-metrics">' +
+          '<div class="contestant-likes">' + formatNumber(item.likes) + ' <span>likes</span></div>' +
+          '<div class="contestant-comments">' + item.comments + ' comentarios</div>' +
+        '</div>' +
+        '<a class="link-arrow" href="' + item.url + '" target="_blank" title="Abrir en Instagram">↗</a>';
+
+      grid.appendChild(row);
+    });
+  }
+
+  function fetchLiveData() {
+    fetch("/api/data?t=" + Date.now())
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        var list = res.data || res;
+        if (Array.isArray(list)) {
+          render(list);
+          if (res.lastUpdate) {
+            document.getElementById("statTime").textContent = new Date(res.lastUpdate).toLocaleTimeString("es-CL");
+          }
+        }
+      })
+      .catch(function() {
+        // Fallback local/Vercel
+        fetch("conteo_resultados.json?t=" + Date.now())
+          .then(function(r) { return r.json(); })
+          .then(function(items) { render(items); })
+          .catch(function() {
+            render(fallbackData);
+          });
+      });
+  }
+
+  function startCountdown() {
+    clearInterval(countdownTimer);
+    countdown = 45;
+    countdownTimer = setInterval(function() {
+      countdown--;
+      if (countdown <= 0) {
+        countdown = 45;
+        fetchLiveData();
+      }
+      document.getElementById("statCountdown").textContent = "Próxima en " + countdown + "s";
+    }, 1000);
+  }
+
+  var btnRefresh = document.getElementById("btnRefresh");
+  btnRefresh.addEventListener("click", function() {
+    btnRefresh.classList.add("loading");
+    document.getElementById("refreshIcon").textContent = "⏳";
+    document.getElementById("refreshText").textContent = "Actualizando...";
+
+    fetch("/api/refresh")
+      .catch(function() {})
+      .then(function() {
+        setTimeout(function() {
+          fetchLiveData();
+          btnRefresh.classList.remove("loading");
+          document.getElementById("refreshIcon").textContent = "🔄";
+          document.getElementById("refreshText").textContent = "Actualizar";
+          startCountdown();
+        }, 12000);
+      });
+  });
+
+  render(fallbackData);
+  fetchLiveData();
+  startCountdown();
+  setInterval(fetchLiveData, 8000);
+})();
+</script>
+</body>
+</html>
