@@ -184,3 +184,4 @@
   // Sondeo de datos en vivo cada 6 segundos
   setInterval(fetchLiveData, 6000);
 })();
+

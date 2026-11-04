@@ -46,7 +46,47 @@ header {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 18px;
+}
+
+.header-main {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1 1 500px;
+  min-width: 0;
+}
+
+.header-logos {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #f8fafc;
+  padding: 8px 14px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.logo-escuela {
+  height: 64px;
+  width: auto;
+  max-width: 58px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
+}
+
+.logo-divider {
+  width: 1px;
+  height: 42px;
+  background: #cbd5e1;
+}
+
+.logo-slep {
+  height: 44px;
+  width: auto;
+  max-width: 110px;
+  object-fit: contain;
 }
 
 .school-tag {
@@ -510,18 +550,100 @@ header {
 
 /* Footer */
 footer {
+  margin-top: 48px;
+}
+
+.footer-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 20px;
   text-align: center;
-  margin-top: 36px;
+  box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.03);
+}
+
+.footer-logos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 14px;
+}
+
+.footer-logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  opacity: 0.9;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.06));
+}
+
+.footer-logo.slep {
+  height: 30px;
+}
+
+.footer-title {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 0.95rem;
+}
+
+.footer-sub {
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
+  margin-top: 2px;
+}
+
+.footer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 6px 14px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  color: #475569;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mj-brand {
+  font-weight: 800;
+  color: #0f172a;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 2px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.mj-brand sup {
+  color: #ec4899;
+  font-size: 0.72em;
+  font-weight: 900;
+  margin-left: 1px;
+}
+
+.footer-rights {
+  margin-top: 10px;
+  color: #94a3b8;
+  font-size: 0.75rem;
 }
 
 @media (max-width: 600px) {
   body { padding: 16px 12px 60px; }
   header { padding: 18px 16px; border-radius: 16px; }
+  .header-main { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .header-logos { width: 100%; justify-content: center; }
   .header-titles h1 { font-size: 1.3rem; }
   .contestant-row { padding: 12px 14px; gap: 10px; }
   .contestant-img { width: 48px; height: 48px; }
   .contestant-likes { font-size: 1.2rem; }
   .rank-badge { width: 30px; height: 30px; font-size: 0.85rem; }
 }
+
