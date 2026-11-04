@@ -26,6 +26,26 @@ const urls = [
   "https://www.instagram.com/p/DfTQie5Onwa/"
 ];
 
+const namesMap = {
+  'DfTRB7DOhP5': 'MAITTE OPAZO',
+  'DfTQ_Yku8UC': 'PALOMA ALVARADO',
+  'DfTQ7cLOoRa': 'ISADORA MARTINEZ',
+  'DfTQ4VWOgnQ': 'LUCIA SOTO',
+  'DfTQ173OYef': 'LEONOR GONZALEZ',
+  'DfTQzO9O8bc': 'ISIADORA LEIVA',
+  'DfTQwh-u8jD': 'EMILIA FRITSCH',
+  'DfTQtpwumd2': 'EMILIA BORQUEZ',
+  'DfTQqfYOlUD': 'ESTEFANI CARCAMO',
+  'DfTQnVYuKlp': 'VICTOR VEGA',
+  'DfTQlOMuffA': 'JAVIERA ACUÑA Y DAYHARY PEREZ',
+  'DfTQie5Onwa': 'DAMARYS ALVAREZ',
+  'DfTQe-NOAZX': 'GIANELLA MONSALVE',
+  'DfTQcjBu1HN': 'KEVIN DOMKE Y MATILDA ESPINOZA',
+  'DfTQZ4BuX8u': 'ROSA HARO',
+  'DfTQT1eOlfE': 'FERNANDA GALLARDO',
+  'DfTQQT-OWM0': 'RENATA ARRIAGADA'
+};
+
 let isScraping = false;
 let lastUpdate = Date.now();
 
@@ -95,12 +115,14 @@ async function updateAll() {
   // Fusionar con datos previos para preservar imágenes si alguna llamada falló
   const merged = results.map(r => {
     const prev = currentData.find(p => p.url === r.url) || {};
+    const code = r.shortcode || prev.shortcode || r.url.split('/p/')[1].replace(/\//g, '');
     return {
       url: r.url,
-      shortcode: r.shortcode || prev.shortcode || r.url.split('/p/')[1].replace(/\//g, ''),
+      shortcode: code,
+      name: namesMap[code] || prev.name || 'PARTICIPANTE',
       likes: r.success ? r.likes : (prev.likes || 0),
       comments: r.success ? r.comments : (prev.comments || 0),
-      localImage: r.localImage || prev.localImage || `fotos/${r.url.split('/p/')[1].replace(/\//g, '')}.jpg`,
+      localImage: r.localImage || prev.localImage || `fotos/${code}.jpg`,
       image: r.image || prev.image || '',
       success: r.success
     };
