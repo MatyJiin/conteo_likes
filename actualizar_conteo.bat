@@ -1,18 +1,13 @@
 @echo off
 chcp 65001 > nul
 echo ========================================================
-echo   ACTUALIZANDO CONTEO DE LIKES EN VIVO (17 PUBLICACIONES)
+echo   ACTUALIZANDO CONTEO DE LIKES EN VIVO (SIN CACHE)
 echo ========================================================
 echo.
-node contar_todos.js
-echo.
-node export_csv.js
+node scrape_all_fresh.js
 echo.
 echo ========================================================
-echo   ¡Listo! Datos actualizados en:
-echo   - index.html (Abrelo en el navegador o recárgalo con F5)
-echo   - conteo_likes.csv (Archivo para Excel)
+echo   ¡Listo! Conteo actualizado con los números reales.
 echo ========================================================
 echo.
 pause
-

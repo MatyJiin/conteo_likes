@@ -65,12 +65,19 @@ if (fs.existsSync('conteo_resultados.json')) {
   }
 }
 
+const os = require('os');
+
 function scrapeUrl(url) {
   return new Promise((resolve) => {
-    const cmd = `"${chromePath}" --headless=new --disable-gpu --dump-dom "${url}"`;
-    exec(cmd, { maxBuffer: 15 * 1024 * 1024, timeout: 15000 }, (error, stdout) => {
+    const code = url.split('/p/')[1].replace(/\//g, '');
+    const tempProfile = path.join(os.tmpdir(), `ch_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`);
+    const cmd = `"${chromePath}" --headless=new --disable-gpu --incognito --disable-cache --disk-cache-size=0 --user-data-dir="${tempProfile}" --dump-dom "${url}?_t=${Date.now()}"`;
+
+    exec(cmd, { maxBuffer: 15 * 1024 * 1024, timeout: 25000 }, (error, stdout) => {
+      try { fs.rmSync(tempProfile, { recursive: true, force: true }); } catch (e) {}
+
       if (error || !stdout) {
-        return resolve({ url, success: false });
+        return resolve({ url, shortcode: code, success: false });
       }
       
       const likesMatch = stdout.match(/([0-9.,]+)\s*(?:likes|me gusta)/i);
@@ -88,10 +95,7 @@ function scrapeUrl(url) {
       const ogImg = stdout.match(/<meta property="og:image" content="([^"]+)"/i);
       const image = ogImg ? ogImg[1].replace(/&amp;/g, '&') : '';
 
-      const code = url.split('/p/')[1].replace(/\//g, '');
       const localImage = `fotos/${code}.jpg`;
-
-      // Si la foto no existe localmente pero la tenemos de og:image, la descargamos
       if (image && !fs.existsSync(localImage)) {
         fetch(image, { headers: { 'User-Agent': 'Mozilla/5.0' } })
           .then(r => r.arrayBuffer())
@@ -99,7 +103,16 @@ function scrapeUrl(url) {
           .catch(() => {});
       }
 
-      resolve({ url, likes, comments, localImage, image, shortcode: code, success: true });
+      resolve({
+        url,
+        shortcode: code,
+        name: namesMap[code] || 'PARTICIPANTE',
+        likes,
+        comments,
+        localImage,
+        image,
+        success: likes > 0
+      });
     });
   });
 }
@@ -107,30 +120,27 @@ function scrapeUrl(url) {
 async function updateAll() {
   if (isScraping) return currentData;
   isScraping = true;
-  console.log(`[${new Date().toLocaleTimeString('es-CL')}] Verificando votos de las 17 publicaciones...`);
+  console.log(`[${new Date().toLocaleTimeString('es-CL')}] Verificando votos frescos en vivo...`);
 
-  // Ejecutamos en tandas de 3 concurrentes para ser rápidos y respetuosos
   const results = [];
-  const batchSize = 3;
-  for (let i = 0; i < urls.length; i += batchSize) {
-    const batch = urls.slice(i, i + batchSize);
-    const batchResults = await Promise.all(batch.map(scrapeUrl));
-    results.push(...batchResults);
+  // Uno por uno para evitar bloqueos y garantizar frescura máxima
+  for (let i = 0; i < urls.length; i++) {
+    const res = await scrapeUrl(urls[i]);
+    results.push(res);
   }
 
-  // Fusionar con datos previos para preservar imágenes si alguna llamada falló
   const merged = results.map(r => {
-    const prev = currentData.find(p => p.url === r.url) || {};
+    const prev = currentData.find(p => p.shortcode === r.shortcode) || {};
     const code = r.shortcode || prev.shortcode || r.url.split('/p/')[1].replace(/\//g, '');
     return {
       url: r.url,
       shortcode: code,
       name: namesMap[code] || prev.name || 'PARTICIPANTE',
-      likes: r.success ? r.likes : (prev.likes || 0),
+      likes: r.success && r.likes > 0 ? r.likes : (prev.likes || r.likes || 0),
       comments: r.success ? r.comments : (prev.comments || 0),
       localImage: r.localImage || prev.localImage || `fotos/${code}.jpg`,
       image: r.image || prev.image || '',
-      success: r.success
+      success: true
     };
   });
 
@@ -141,10 +151,9 @@ async function updateAll() {
 
   try {
     fs.writeFileSync('conteo_resultados.json', JSON.stringify(currentData, null, 2));
-    // Guardar CSV
-    let csv = "Ranking,Likes,Comentarios,Enlace\n";
+    let csv = "Ranking,Concursante,Likes (Votos),Comentarios,Enlace\n";
     currentData.forEach((item, idx) => {
-      csv += `${idx + 1},${item.likes},${item.comments},"${item.url}"\n`;
+      csv += `${idx + 1},"${item.name}",${item.likes},${item.comments},"${item.url}"\n`;
     });
     fs.writeFileSync('conteo_likes.csv', '\uFEFF' + csv, 'utf8');
   } catch (e) {
