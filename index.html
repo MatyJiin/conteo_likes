@@ -9,12 +9,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f8fafc;
+    --bg: #e2e8f0;
     --surface: #ffffff;
     --surface-hover: #f1f5f9;
-    --text-main: #0f172a;
+    --text-main: #1e293b;
     --text-muted: #64748b;
-    --line: #e2e8f0;
+    --line: #cbd5e1;
     --primary: #ec4899;
     --primary-light: #fdf2f8;
     --primary-dark: #be185d;
@@ -34,11 +34,11 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    background: linear-gradient(180deg, #f0fdf4 0%, #f8fafc 180px, #f8fafc 100%);
+    background: #e2e8f0;
     color: var(--text-main);
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     line-height: 1.5;
-    padding: 24px 16px 80px;
+    padding: 20px 16px 70px;
     min-height: 100vh;
   }
 
@@ -150,20 +150,20 @@
     pointer-events: none;
   }
 
-  /* Stats Bar */
+  /* Stats Bar - Compacto y sutil */
   .stats-bar {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 16px;
-    margin-bottom: 32px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
   }
 
   .stat-card {
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 18px;
-    padding: 18px 22px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    border-radius: 12px;
+    padding: 10px 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
     position: relative;
     overflow: hidden;
   }
@@ -173,7 +173,7 @@
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 3px;
-    background: #e2e8f0;
+    background: #cbd5e1;
   }
 
   .stat-card.accent::after {
@@ -181,7 +181,7 @@
   }
 
   .stat-label {
-    font-size: 0.8rem;
+    font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -189,10 +189,10 @@
   }
 
   .stat-val {
-    font-size: 2.1rem;
+    font-size: 1.35rem;
     font-weight: 800;
     color: #0f172a;
-    margin-top: 4px;
+    margin-top: 2px;
     line-height: 1.1;
   }
 
@@ -203,9 +203,9 @@
   }
 
   .stat-meta {
-    font-size: 0.82rem;
+    font-size: 0.75rem;
     color: #64748b;
-    margin-top: 4px;
+    margin-top: 2px;
   }
 
   /* Section Titles */
@@ -518,22 +518,6 @@
     background: #f1f5f9;
   }
 
-  .btn-edit {
-    background: transparent;
-    border: 0;
-    cursor: pointer;
-    font-size: 0.82rem;
-    opacity: 0.4;
-    margin-left: 6px;
-    padding: 3px 6px;
-    border-radius: 6px;
-    transition: all 0.2s;
-  }
-  .btn-edit:hover {
-    opacity: 1;
-    background: #e2e8f0;
-  }
-
   /* Footer */
   footer {
     text-align: center;
@@ -573,12 +557,12 @@
     </div>
   </header>
 
-  <!-- Tarjetas de Resumen -->
+  <!-- Tarjetas de Resumen (Compactas) -->
   <div class="stats-bar">
     <div class="stat-card accent">
-      <div class="stat-label">Total de Votos (Likes)</div>
+      <div class="stat-label">Total Votos (Likes)</div>
       <div id="statTotalLikes" class="stat-val">–</div>
-      <div class="stat-meta">Votos acumulados en Instagram</div>
+      <div class="stat-meta">Votos oficiales en Instagram</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Concursantes</div>
@@ -586,14 +570,9 @@
       <div class="stat-meta">Artistas participantes</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Líder del Concurso</div>
-      <div id="statLeader" class="stat-val">–</div>
-      <div id="statLeaderDiff" class="stat-meta">–</div>
-    </div>
-    <div class="stat-card">
       <div class="stat-label">Última Revisión</div>
-      <div id="statTime" class="stat-val" style="font-size: 1.5rem; padding-top: 4px;">–</div>
-      <div id="statCountdown" class="stat-meta">Próxima en 45s</div>
+      <div id="statTime" class="stat-val">–</div>
+      <div id="statCountdown" class="stat-meta">Próxima en 15s</div>
     </div>
   </div>
 
@@ -655,11 +634,6 @@
     items.forEach(function(x) { totalLikes += (x.likes || 0); });
 
     document.getElementById("statTotalLikes").textContent = formatNumber(totalLikes);
-    document.getElementById("statLeader").textContent = items[0].name || "LÍDER";
-    if (items[1]) {
-      var diff = items[0].likes - items[1].likes;
-      document.getElementById("statLeaderDiff").textContent = formatNumber(items[0].likes) + " likes (+" + diff + " sobre el 2° lugar)";
-    }
 
     // 1. Render Podio
     var pod = document.getElementById("podium");
@@ -724,7 +698,7 @@
           '<div class="bar-container"><div class="bar-fill" style="width: ' + pct + '%"></div></div>' +
         '</div>' +
         '<div class="contestant-metrics">' +
-          '<div class="contestant-likes">' + formatNumber(item.likes) + ' <span>likes</span> <button class="btn-edit" onclick="window.editLikes(\'' + item.shortcode + '\', ' + item.likes + ', \'' + name.replace(/'/g, "\\'") + '\')" title="Ajustar manualmente">✏️</button></div>' +
+          '<div class="contestant-likes">' + formatNumber(item.likes) + ' <span>likes</span></div>' +
           '<div class="contestant-comments">' + item.comments + ' comentarios</div>' +
         '</div>' +
         '<a class="link-arrow" href="' + item.url + '" target="_blank" title="Abrir en Instagram">↗</a>';
@@ -732,28 +706,6 @@
       grid.appendChild(row);
     });
   }
-
-  window.editLikes = function(shortcode, currentLikes, name) {
-    var nuevo = prompt("Ajustar votos para " + name + ":", currentLikes);
-    if (nuevo !== null && nuevo.trim() !== "") {
-      var val = parseInt(nuevo.replace(/\./g, ""), 10);
-      if (!isNaN(val)) {
-        fetch("/api/edit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ shortcode: shortcode, likes: val })
-        })
-        .then(function() {
-          fetchLiveData();
-        })
-        .catch(function() {
-          var it = fallbackData.find(function(x) { return x.shortcode === shortcode; });
-          if (it) it.likes = val;
-          render(fallbackData);
-        });
-      }
-    }
-  };
 
   function fetchLiveData() {
     fetch("/api/data?t=" + Date.now())
