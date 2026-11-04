@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel de Calibración Oficial - Festival Voces de la Patagonia</title>
+  <link rel="icon" type="image/png" href="assets/logo_escuela.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-light: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #ec4899;
+      --primary-hover: #db2777;
+      --ok: #10b981;
+      --warning: #f59e0b;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      padding: 24px 16px 80px;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    header {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .header-titles h1 { font-size: 1.4rem; font-weight: 800; }
+    .header-titles p { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
+    .btn-public {
+      background: #334155;
+      color: #fff;
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-public:hover { background: #475569; }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Token Form */
+    .token-box { display: flex; gap: 10px; }
+    .input-text {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+    .input-text:focus { outline: none; border-color: var(--primary); }
+
+    /* Actions bar */
+    .actions-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .btn {
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-save {
+      background: linear-gradient(135deg, #ec4899, #db2777);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(236, 72, 153, 0.4);
+    }
+    .btn-save:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(236, 72, 153, 0.5); }
+    .btn-close-contest {
+      background: #dc2626;
+      color: #fff;
+    }
+    .btn-close-contest:hover { background: #b91c1c; }
+    .btn-sync {
+      background: #2563eb;
+      color: #fff;
+    }
+    .btn-sync:hover { background: #1d4ed8; }
+
+    /* Contestants Table */
+    .contestant-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 10px;
+      transition: all 0.2s;
+    }
+    .contestant-item:hover { background: rgba(255, 255, 255, 0.05); }
+    .c-rank {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+    }
+    .c-img {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #334155;
+    }
+    .c-info { flex: 1; min-width: 0; }
+    .c-name { font-weight: 700; font-size: 0.92rem; color: #fff; }
+    .c-shortcode { font-size: 0.75rem; color: var(--text-muted); }
+    .c-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .c-input-wrap label { font-size: 0.8rem; color: var(--text-muted); }
+    .c-input {
+      width: 100px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      color: #38bdf8;
+      font-size: 1.1rem;
+      font-weight: 800;
+      text-align: center;
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+    .c-input:focus { outline: none; border-color: var(--primary); background: #0b1120; }
+    .status-msg {
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+      display: none;
+    }
+    .status-msg.ok { background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #6ee7b7; display: block; }
+    .status-msg.err { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; display: block; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="header-titles">
+      <h1>🎛️ Panel de Calibración y Cierre Oficial</h1>
+      <p>Festival Escolar Voces de la Patagonia • Control de Resultados Oficiales</p>
+    </div>
+    <a href="index.html" class="btn-public" target="_blank">Ver Sitio Público ↗</a>
+  </header>
+
+  <div id="statusMsg" class="status-msg"></div>
+
+  <!-- Token Management -->
+  <div class="card">
+    <div class="card-title">🔑 Token Oficial de Meta Graph API</div>
+    <div class="token-box">
+      <input type="text" id="tokenInput" class="input-text" placeholder="Pega aquí el nuevo Access Token de Meta si expiró...">
+      <button id="btnSaveToken" class="btn btn-sync" type="button">Actualizar Token</button>
+    </div>
+    <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 8px;">
+      Si renuevas el token en Meta for Developers, pégalo aquí y el sistema reanudará la lectura automática.
+    </p>
+  </div>
+
+  <!-- Main Actions -->
+  <div class="actions-bar">
+    <div style="display: flex; gap: 10px;">
+      <button id="btnSaveAll" class="btn btn-save" type="button">
+        <span>🚀 Guardar y Publicar en Vercel</span>
+      </button>
+      <button id="btnSyncMeta" class="btn btn-sync" type="button">
+        <span>🔄 Leer Datos Frescos de Meta</span>
+      </button>
+    </div>
+    <button id="btnCloseContest" class="btn btn-close-contest" type="button">
+      <span>🔒 Cierre Oficial (Congelar Votación)</span>
+    </button>
+  </div>
+
+  <!-- Contestants List -->
+  <div class="card">
+    <div class="card-title" style="justify-content: space-between;">
+      <span>👥 Votos de los 17 Concursantes (Edición Inmediata)</span>
+      <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">Escribe los likes exactos de la app y haz clic en Guardar</span>
+    </div>
+    <div id="contestantsContainer"></div>
+  </div>
+</div>
+
+<script>
+  let currentContestants = [];
+  const statusEl = document.getElementById("statusMsg");
+
+  function showStatus(msg, isOk = true) {
+    statusEl.textContent = msg;
+    statusEl.className = "status-msg " + (isOk ? "ok" : "err");
+    setTimeout(() => {
+      statusEl.style.display = "none";
+    }, 6000);
+  }
+
+  async function loadData() {
+    try {
+      const res = await fetch("/api/data?t=" + Date.now());
+      const json = await res.json();
+      currentContestants = json.data || [];
+      renderList();
+    } catch (e) {
+      showStatus("Error al cargar datos: " + e.message, false);
+    }
+  }
+
+  function renderList() {
+    const container = document.getElementById("contestantsContainer");
+    container.innerHTML = "";
+    currentContestants.sort((a, b) => b.likes - a.likes);
+
+    currentContestants.forEach((c, idx) => {
+      const div = document.createElement("div");
+      div.className = "contestant-item";
+      div.innerHTML = `
+        <div class="c-rank">${idx + 1}</div>
+        <img class="c-img" src="${c.localImage || 'fotos/' + c.shortcode + '.jpg'}" alt="${c.name}">
+        <div class="c-info">
+          <div class="c-name">${c.name}</div>
+          <div class="c-shortcode">${c.shortcode} • <a href="${c.url}" target="_blank" style="color:#38bdf8; text-decoration:none;">Ver post</a></div>
+        </div>
+        <div class="c-input-wrap">
+          <label>Likes:</label>
+          <input type="number" class="c-input" data-code="${c.shortcode}" value="${c.likes}">
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  // Guardar Cambios y sincronizar con Vercel
+  document.getElementById("btnSaveAll").addEventListener("click", async () => {
+    const btn = document.getElementById("btnSaveAll");
+    btn.disabled = true;
+    btn.textContent = "⏳ Guardando y subiendo a Vercel...";
+
+    const inputs = document.querySelectorAll(".c-input");
+    inputs.forEach(input => {
+      const code = input.dataset.code;
+      const val = parseInt(input.value, 10);
+      const c = currentContestants.find(x => x.shortcode === code);
+      if (c && !isNaN(val)) {
+        c.likes = val;
+      }
+    });
+
+    try {
+      const res = await fetch("/api/admin/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contestants: currentContestants })
+      });
+      const json = await res.json();
+      if (json.success) {
+        showStatus("✅ ¡Votos guardados con éxito y desplegados a Vercel!");
+        renderList();
+      } else {
+        showStatus("Aviso: " + (json.error || "Guardado en local"), false);
+      }
+    } catch (e) {
+      showStatus("Error al guardar: " + e.message, false);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "🚀 Guardar y Publicar en Vercel";
+    }
+  });
+
+  // Actualizar Token
+  document.getElementById("btnSaveToken").addEventListener("click", async () => {
+    const token = document.getElementById("tokenInput").value.trim();
+    if (!token) return alert("Por favor escribe o pega un token");
+
+    try {
+      const res = await fetch("/api/admin/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token })
+      });
+      const json = await res.json();
+      if (json.success) {
+        showStatus("✅ ¡Token actualizado y guardado correctamente!");
+        document.getElementById("tokenInput").value = "";
+      } else {
+        showStatus("Error: " + json.error, false);
+      }
+    } catch (e) {
+      showStatus("Error al actualizar token: " + e.message, false);
+    }
+  });
+
+  // Forzar Sync Meta
+  document.getElementById("btnSyncMeta").addEventListener("click", async () => {
+    showStatus("Consultando API de Meta...");
+    try {
+      const res = await fetch("/api/refresh");
+      await loadData();
+      showStatus("✅ Datos actualizados desde Meta API");
+    } catch (e) {
+      showStatus("Error al sincronizar con Meta", false);
+    }
+  });
+
+  // Cierre Oficial
+  document.getElementById("btnCloseContest").addEventListener("click", async () => {
+    if (!confirm("¿Deseas cerrar oficialmente la votación y congelar el cómputo final?")) return;
+    try {
+      const res = await fetch("/api/admin/close", { method: "POST" });
+      const json = await res.json();
+      if (json.success) {
+        alert("🏆 ¡Votación cerrada oficialmente! El sitio público ahora muestra el Cómputo Definitivo.");
+      }
+    } catch (e) {
+      alert("Error: " + e.message);
+    }
+  });
+
+  loadData();
+</script>
+</body>
+</html>

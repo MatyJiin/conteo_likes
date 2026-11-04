@@ -1,9 +1,10 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { exec } = require('child_process');
 
 const PORT = 3000;
-const token = "EAAQ2m5P4VKUBSZBiZAkjWHvvGsi1WfRM6NZBSggcU7kriM08Qolr2pL4IDE8jenbVbjeTmwyQZAI30rRt3xCeMV9eytAstmNqCCM9B8iN0nU8g2bB0GM5ZBWz8BbYFAiu0ZC2sNj6PT6cM8trTsvQk5EKvShg5Aycwq0PzPx4aIrh6h6g7PVJp8mO0TBKSOFodi8lzzsjt3IzGP9Kb4trk4A7LYaQOUCIjnHvJ";
+let token = "EAAQ2m5P4VKUBSZBiZAkjWHvvGsi1WfRM6NZBSggcU7kriM08Qolr2pL4IDE8jenbVbjeTmwyQZAI30rRt3xCeMV9eytAstmNqCCM9B8iN0nU8g2bB0GM5ZBWz8BbYFAiu0ZC2sNj6PT6cM8trTsvQk5EKvShg5Aycwq0PzPx4aIrh6h6g7PVJp8mO0TBKSOFodi8lzzsjt3IzGP9Kb4trk4A7LYaQOUCIjnHvJ";
 const igId = "17841436768752867";
 
 const namesMap = {
@@ -127,6 +128,79 @@ const server = http.createServer((req, res) => {
     updateFromMetaApi().then(() => {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ status: 'ok', data: currentData }));
+    });
+    return;
+  }
+
+  // Guardar calibración manual y subir a Vercel
+  if (pathname === '/api/admin/save' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const payload = JSON.parse(body);
+        if (Array.isArray(payload.contestants)) {
+          payload.contestants.sort((a, b) => b.likes - a.likes);
+          currentData = payload.contestants;
+          lastUpdate = Date.now();
+          fs.writeFileSync('conteo_resultados.json', JSON.stringify(currentData, null, 2), 'utf8');
+
+          try {
+            let appJs = fs.readFileSync('app.js', 'utf8');
+            const startMarker = 'var fallbackData = [';
+            const endMarker = '  ];\n';
+            const sIdx = appJs.indexOf(startMarker);
+            const eIdx = appJs.indexOf(endMarker, sIdx);
+            if (sIdx !== -1 && eIdx !== -1) {
+              appJs = appJs.slice(0, sIdx) + 'var fallbackData = ' + JSON.stringify(currentData, null, 2) + ';' + appJs.slice(eIdx + endMarker.length);
+              fs.writeFileSync('app.js', appJs, 'utf8');
+            }
+          } catch(e) {}
+
+          exec('git add conteo_resultados.json app.js && git commit -m "Calibración manual de votos oficiales" && git push origin main', (err) => {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, pushedToVercel: !err }));
+          });
+          return;
+        }
+      } catch (e) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ success: false, error: e.message }));
+      }
+    });
+    return;
+  }
+
+  // Actualizar Token de Meta
+  if (pathname === '/api/admin/token' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const payload = JSON.parse(body);
+        if (payload.token) {
+          token = payload.token.trim();
+          updateFromMetaApi().catch(() => {});
+
+          exec('git add -A && git commit -m "Actualizar Token Meta Graph API" && git push origin main', () => {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true }));
+          });
+          return;
+        }
+      } catch (e) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ success: false, error: e.message }));
+      }
+    });
+    return;
+  }
+
+  // Cierre Oficial
+  if (pathname === '/api/admin/close' && req.method === 'POST') {
+    exec('git add -A && git commit -m "Cierre oficial del concurso - Votacion congelada" && git push origin main', () => {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true }));
     });
     return;
   }
