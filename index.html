@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Votación En Vivo - Festival Escolar Voces de la Patagonia</title>
+  <title>Votación Oficial - Festival Escolar Voces de la Patagonia</title>
   <link rel="icon" type="image/png" href="assets/logo_escuela.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=3">
-  <script src="app.js?v=3" defer></script>
+  <link rel="stylesheet" href="style.css?v=4">
+  <script src="app.js?v=4" defer></script>
 </head>
 <body>
 <div class="container">
@@ -23,13 +23,13 @@
       <div class="header-titles">
         <div class="school-tag">🎤 Escuela Víctor Domingo Silva • SLEP Aysén</div>
         <h1>Festival Escolar Voces de la Patagonia</h1>
-        <p>Votación oficial del público en tiempo real • 4.ª Edición</p>
+        <p>Votación oficial del público • Sincronización periódica Meta API • 4.ª Edición</p>
       </div>
     </div>
     <div class="live-actions">
       <div class="live-pill">
         <span class="live-dot"></span>
-        <span>En Vivo</span>
+        <span>Sincronizando</span>
       </div>
       <button id="btnRefresh" class="btn-refresh" type="button" title="Consultar votos ahora">
         <span id="refreshIcon">🔄</span>
@@ -37,6 +37,15 @@
       </button>
     </div>
   </header>
+
+  <!-- Aviso Informativo de Desfase Técnico de Meta API -->
+  <div class="transparency-notice">
+    <div class="notice-icon">ℹ️</div>
+    <div class="notice-text">
+      <strong>Información sobre el conteo de votos:</strong>
+      Las métricas provienen de la API Oficial de Meta (Instagram). Debido a las políticas de seguridad y validación de interacciones de Meta, los votos se consolidan en la base de datos central con un <strong>desfase técnico habitual de 15 a 30 minutos</strong> respecto a la aplicación móvil. El cómputo se actualiza periódicamente para todos los participantes bajo las mismas condiciones.
+    </div>
+  </div>
 
   <!-- Tarjetas de Resumen (Compactas) -->
   <div class="stats-bar">
@@ -79,10 +88,10 @@
       <p class="footer-title">Festival Escolar Voces de la Patagonia • 4.ª Edición</p>
       <p class="footer-sub">Escuela Víctor Domingo Silva &amp; Servicio Local de Educación Pública Aysén</p>
       <div class="footer-badge">
-        <span>Sistema de cómputo oficial en tiempo real desarrollado por</span>
+        <span>Sistema de cómputo oficial desarrollado por</span>
         <span class="mj-brand">MJ<sup>®</sup></span>
       </div>
-      <p class="footer-rights">© 2026 MJ® • Marca Registrada • Todos los derechos reservados</p>
+      <p class="footer-rights">© 2026 MJ® • Marca Registrada • Conexión verificada Meta Graph API • Sincronización continua</p>
     </div>
   </footer>
 </div>
