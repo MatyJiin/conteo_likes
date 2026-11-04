@@ -518,6 +518,22 @@
     background: #f1f5f9;
   }
 
+  .btn-edit {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font-size: 0.82rem;
+    opacity: 0.4;
+    margin-left: 6px;
+    padding: 3px 6px;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+  .btn-edit:hover {
+    opacity: 1;
+    background: #e2e8f0;
+  }
+
   /* Footer */
   footer {
     text-align: center;
@@ -606,7 +622,7 @@
 
   // Datos base garantizados (con imágenes locales y nombres oficiales)
   var fallbackData = [
-    { "url": "https://www.instagram.com/p/DfTQQT-OWM0/", "shortcode": "DfTQQT-OWM0", "name": "RENATA ARRIAGADA", "likes": 490, "comments": 18, "localImage": "fotos/DfTQQT-OWM0.jpg" },
+    { "url": "https://www.instagram.com/p/DfTQQT-OWM0/", "shortcode": "DfTQQT-OWM0", "name": "RENATA ARRIAGADA", "likes": 497, "comments": 18, "localImage": "fotos/DfTQQT-OWM0.jpg" },
     { "url": "https://www.instagram.com/p/DfTRB7DOhP5/", "shortcode": "DfTRB7DOhP5", "name": "MAITTE OPAZO", "likes": 378, "comments": 28, "localImage": "fotos/DfTRB7DOhP5.jpg" },
     { "url": "https://www.instagram.com/p/DfTQwh-u8jD/", "shortcode": "DfTQwh-u8jD", "name": "EMILIA FRITSCH", "likes": 210, "comments": 8, "localImage": "fotos/DfTQwh-u8jD.jpg" },
     { "url": "https://www.instagram.com/p/DfTQZ4BuX8u/", "shortcode": "DfTQZ4BuX8u", "name": "ROSA HARO", "likes": 188, "comments": 14, "localImage": "fotos/DfTQZ4BuX8u.jpg" },
@@ -708,7 +724,7 @@
           '<div class="bar-container"><div class="bar-fill" style="width: ' + pct + '%"></div></div>' +
         '</div>' +
         '<div class="contestant-metrics">' +
-          '<div class="contestant-likes">' + formatNumber(item.likes) + ' <span>likes</span></div>' +
+          '<div class="contestant-likes">' + formatNumber(item.likes) + ' <span>likes</span> <button class="btn-edit" onclick="window.editLikes(\'' + item.shortcode + '\', ' + item.likes + ', \'' + name.replace(/'/g, "\\'") + '\')" title="Ajustar manualmente">✏️</button></div>' +
           '<div class="contestant-comments">' + item.comments + ' comentarios</div>' +
         '</div>' +
         '<a class="link-arrow" href="' + item.url + '" target="_blank" title="Abrir en Instagram">↗</a>';
@@ -716,6 +732,28 @@
       grid.appendChild(row);
     });
   }
+
+  window.editLikes = function(shortcode, currentLikes, name) {
+    var nuevo = prompt("Ajustar votos para " + name + ":", currentLikes);
+    if (nuevo !== null && nuevo.trim() !== "") {
+      var val = parseInt(nuevo.replace(/\./g, ""), 10);
+      if (!isNaN(val)) {
+        fetch("/api/edit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ shortcode: shortcode, likes: val })
+        })
+        .then(function() {
+          fetchLiveData();
+        })
+        .catch(function() {
+          var it = fallbackData.find(function(x) { return x.shortcode === shortcode; });
+          if (it) it.likes = val;
+          render(fallbackData);
+        });
+      }
+    }
+  };
 
   function fetchLiveData() {
     fetch("/api/data?t=" + Date.now())

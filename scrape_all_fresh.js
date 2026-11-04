@@ -27,26 +27,29 @@ const namesMap = {
 
 const urls = Object.keys(namesMap).map(code => `https://www.instagram.com/p/${code}/`);
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function scrapeOne(url) {
   const code = url.split('/p/')[1].replace(/\//g, '');
-  const tempProfile = path.join(os.tmpdir(), `chrome_scrape_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`);
+  const tempProfile = path.join(os.tmpdir(), `ch_sc_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`);
+  const rnd = Math.random().toString(36).substring(2, 9);
   
-  const cmd = `"${chromePath}" --headless=new --disable-gpu --incognito --disable-cache --disk-cache-size=0 --user-data-dir="${tempProfile}" --dump-dom "${url}?_t=${Date.now()}"`;
+  // Parámetros de bypass de caché de CDN de Instagram
+  const targetUrl = `${url}?feed_type=popular&utm_source=ig_web_copy_link&v=${rnd}`;
+  const cmd = `"${chromePath}" --headless=new --disable-gpu --incognito --disable-cache --disk-cache-size=0 --user-data-dir="${tempProfile}" --dump-dom "${targetUrl}"`;
   
   try {
     const stdout = execSync(cmd, { encoding: 'utf8', maxBuffer: 15 * 1024 * 1024, timeout: 20000 });
-    
-    // Cleanup temp profile dir
     try { fs.rmSync(tempProfile, { recursive: true, force: true }); } catch (e) {}
 
-    // Match likes
     const likesMatch = stdout.match(/([0-9.,]+)\s*(?:likes|me gusta)/i);
     let likes = 0;
     if (likesMatch) {
       likes = parseInt(likesMatch[1].replace(/[.,]/g, ''), 10) || 0;
     }
 
-    // Match comments
     const commentsMatch = stdout.match(/([0-9.,]+)\s*(?:comments|comentarios)/i);
     let comments = 0;
     if (commentsMatch) {
@@ -68,25 +71,24 @@ function scrapeOne(url) {
     };
   } catch (err) {
     try { fs.rmSync(tempProfile, { recursive: true, force: true }); } catch (e) {}
-    console.error(`Error en ${code}:`, err.message);
     return { url, shortcode: code, name: namesMap[code], likes: 0, comments: 0, success: false };
   }
 }
 
 async function run() {
-  console.log(`[${new Date().toLocaleTimeString('es-CL')}] Iniciando conteo FRESCO sin caché de las 17 publicaciones...`);
+  console.log(`[${new Date().toLocaleTimeString('es-CL')}] Extrayendo datos frescos sin caché con bypass de CDN...`);
   const results = [];
   
   for (let i = 0; i < urls.length; i++) {
     const url = urls[i];
     const code = url.split('/p/')[1].replace(/\//g, '');
-    process.stdout.write(`[${i+1}/17] ${namesMap[code]} (${code})... `);
     const res = scrapeOne(url);
-    console.log(`-> ${res.likes} likes, ${res.comments} coms`);
+    console.log(`[${i+1}/17] ${namesMap[code]}: ${res.likes} likes, ${res.comments} coms`);
     results.push(res);
+    // Pequeña pausa de 800ms para evitar rate limiting de Instagram
+    if (i < urls.length - 1) await sleep(800);
   }
 
-  // Cargar datos previos para no perder datos si alguno devolvió 0 por timeout
   let prevData = [];
   try { prevData = JSON.parse(fs.readFileSync('conteo_resultados.json', 'utf8')); } catch(e) {}
 
@@ -96,8 +98,8 @@ async function run() {
       url: r.url,
       shortcode: r.shortcode,
       name: r.name,
-      likes: r.success && r.likes > 0 ? r.likes : (prev.likes || r.likes),
-      comments: r.success ? r.comments : (prev.comments || r.comments),
+      likes: r.success && r.likes > 0 ? r.likes : (prev.likes || r.likes || 0),
+      comments: r.success ? r.comments : (prev.comments || r.comments || 0),
       localImage: r.localImage,
       image: r.image || prev.image || '',
       success: true
@@ -108,18 +110,16 @@ async function run() {
 
   fs.writeFileSync('conteo_resultados.json', JSON.stringify(finalData, null, 2));
 
-  // CSV
   let csv = 'Ranking,Concursante,Likes (Votos),Comentarios,Enlace\n';
   finalData.forEach((item, idx) => {
     csv += `${idx + 1},"${item.name}",${item.likes},${item.comments},"${item.url}"\n`;
   });
   fs.writeFileSync('conteo_likes.csv', '\uFEFF' + csv, 'utf8');
 
-  console.log('\n--- NUEVO CONTEO EN VIVO ACTUALIZADO ---');
+  console.log('\n--- CONTEO ACTUALIZADO Y GUARDADO ---');
   finalData.forEach((r, idx) => {
-    console.log(`#${idx + 1}: ${r.name.padEnd(30)} -> ${r.likes} likes (${r.comments} coms)`);
+    console.log(`#${idx + 1}: ${r.name.padEnd(30)} -> ${r.likes} likes`);
   });
 }
 
 run();
-

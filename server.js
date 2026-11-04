@@ -67,11 +67,18 @@ if (fs.existsSync('conteo_resultados.json')) {
 
 const os = require('os');
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function scrapeUrl(url) {
   return new Promise((resolve) => {
     const code = url.split('/p/')[1].replace(/\//g, '');
     const tempProfile = path.join(os.tmpdir(), `ch_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`);
-    const cmd = `"${chromePath}" --headless=new --disable-gpu --incognito --disable-cache --disk-cache-size=0 --user-data-dir="${tempProfile}" --dump-dom "${url}?_t=${Date.now()}"`;
+    const rnd = Math.random().toString(36).substring(2, 9);
+    const targetUrl = `${url}?feed_type=popular&utm_source=ig_web_copy_link&v=${rnd}`;
+    
+    const cmd = `"${chromePath}" --headless=new --disable-gpu --incognito --disable-cache --disk-cache-size=0 --user-data-dir="${tempProfile}" --dump-dom "${targetUrl}"`;
 
     exec(cmd, { maxBuffer: 15 * 1024 * 1024, timeout: 25000 }, (error, stdout) => {
       try { fs.rmSync(tempProfile, { recursive: true, force: true }); } catch (e) {}
@@ -120,13 +127,13 @@ function scrapeUrl(url) {
 async function updateAll() {
   if (isScraping) return currentData;
   isScraping = true;
-  console.log(`[${new Date().toLocaleTimeString('es-CL')}] Verificando votos frescos en vivo...`);
+  console.log(`[${new Date().toLocaleTimeString('es-CL')}] Verificando votos frescos en vivo (bypass CDN)...`);
 
   const results = [];
-  // Uno por uno para evitar bloqueos y garantizar frescura máxima
   for (let i = 0; i < urls.length; i++) {
     const res = await scrapeUrl(urls[i]);
     results.push(res);
+    if (i < urls.length - 1) await sleep(800);
   }
 
   const merged = results.map(r => {
@@ -164,10 +171,10 @@ async function updateAll() {
   return currentData;
 }
 
-// Auto-actualización cada 45 segundos
+// Auto-actualización cada 90 segundos para evitar bloqueos de Instagram
 setInterval(() => {
   updateAll().catch(e => console.error(e));
-}, 45000);
+}, 90000);
 
 const mimeTypes = {
   '.html': 'text/html; charset=utf-8',
@@ -204,6 +211,36 @@ const server = http.createServer(async (req, res) => {
     }
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({ status: 'updating' }));
+  }
+
+  // Endpoint para editar un número manualmente
+  if (pathname === '/api/edit' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const payload = JSON.parse(body);
+        const item = currentData.find(p => p.shortcode === payload.shortcode);
+        if (item && typeof payload.likes === 'number') {
+          item.likes = payload.likes;
+          currentData.sort((a, b) => b.likes - a.likes);
+          lastUpdate = Date.now();
+          fs.writeFileSync('conteo_resultados.json', JSON.stringify(currentData, null, 2));
+
+          let csv = "Ranking,Concursante,Likes (Votos),Comentarios,Enlace\n";
+          currentData.forEach((it, idx) => {
+            csv += `${idx + 1},"${it.name}",${it.likes},${it.comments},"${it.url}"\n`;
+          });
+          fs.writeFileSync('conteo_likes.csv', '\uFEFF' + csv, 'utf8');
+
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ success: true, data: currentData }));
+        }
+      } catch (e) {}
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ error: 'Invalid data' }));
+    });
+    return;
   }
 
   // Servir archivos estáticos
