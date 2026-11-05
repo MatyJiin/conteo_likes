@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Panel de Calibración Oficial - Festival Voces de la Patagonia</title>
+  <title>Panel de Calibración Oficial (IG + FB) - Festival Voces de la Patagonia</title>
   <link rel="icon" type="image/png" href="assets/logo_escuela.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,6 +17,7 @@
       --text-muted: #94a3b8;
       --primary: #ec4899;
       --primary-hover: #db2777;
+      --fb: #3b82f6;
       --ok: #10b981;
       --warning: #f59e0b;
       --border: #334155;
@@ -28,7 +29,7 @@
       font-family: 'Plus Jakarta Sans', sans-serif;
       padding: 24px 16px 80px;
     }
-    .container { max-width: 900px; margin: 0 auto; }
+    .container { max-width: 980px; margin: 0 auto; }
     header {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -128,13 +129,14 @@
     .contestant-item {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       padding: 12px 16px;
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--border);
       border-radius: 12px;
       margin-bottom: 10px;
       transition: all 0.2s;
+      flex-wrap: wrap;
     }
     .contestant-item:hover { background: rgba(255, 255, 255, 0.05); }
     .c-rank {
@@ -156,27 +158,59 @@
       object-fit: cover;
       background: #334155;
     }
-    .c-info { flex: 1; min-width: 0; }
+    .c-info { flex: 1; min-width: 180px; }
     .c-name { font-weight: 700; font-size: 0.92rem; color: #fff; }
     .c-shortcode { font-size: 0.75rem; color: var(--text-muted); }
-    .c-input-wrap {
+    
+    .c-inputs-group {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
+      flex-wrap: wrap;
     }
-    .c-input-wrap label { font-size: 0.8rem; color: var(--text-muted); }
+    .c-input-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .c-input-wrap label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .label-ig { color: #f472b6; }
+    .label-fb { color: #60a5fa; }
+
     .c-input {
-      width: 100px;
+      width: 90px;
       background: var(--bg);
       border: 2px solid var(--border);
-      color: #38bdf8;
-      font-size: 1.1rem;
+      color: #fff;
+      font-size: 1.05rem;
       font-weight: 800;
       text-align: center;
-      padding: 6px 10px;
+      padding: 6px 8px;
       border-radius: 8px;
     }
-    .c-input:focus { outline: none; border-color: var(--primary); background: #0b1120; }
+    .c-input.ig { color: #f472b6; border-color: rgba(244, 114, 182, 0.4); }
+    .c-input.ig:focus { border-color: #ec4899; outline: none; }
+    .c-input.fb { color: #60a5fa; border-color: rgba(96, 165, 250, 0.4); }
+    .c-input.fb:focus { border-color: #3b82f6; outline: none; }
+
+    .c-total-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 85px;
+      background: #0b1120;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+    }
+    .c-total-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
+    .c-total-val { font-size: 1.25rem; font-weight: 900; color: #10b981; line-height: 1.1; }
+
     .status-msg {
       padding: 12px 16px;
       border-radius: 10px;
@@ -192,8 +226,8 @@
 <div class="container">
   <header>
     <div class="header-titles">
-      <h1>🎛️ Panel de Calibración y Cierre Oficial</h1>
-      <p>Festival Escolar Voces de la Patagonia • Control de Resultados Oficiales</p>
+      <h1>🎛️ Panel de Calibración Oficial (Instagram + Facebook)</h1>
+      <p>Festival Escolar Voces de la Patagonia • Cómputo General Unificado</p>
     </div>
     <a href="index.html" class="btn-public" target="_blank">Ver Sitio Público ↗</a>
   </header>
@@ -208,13 +242,13 @@
       <button id="btnSaveToken" class="btn btn-sync" type="button">Actualizar Token</button>
     </div>
     <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 8px;">
-      Si renuevas el token en Meta for Developers, pégalo aquí y el sistema reanudará la lectura automática.
+      Al renovar el token en Meta for Developers, pégalo aquí y el sistema reanudará la lectura automática de Instagram.
     </p>
   </div>
 
   <!-- Main Actions -->
   <div class="actions-bar">
-    <div style="display: flex; gap: 10px;">
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
       <button id="btnSaveAll" class="btn btn-save" type="button">
         <span>🚀 Guardar y Publicar en Vercel</span>
       </button>
@@ -229,9 +263,11 @@
 
   <!-- Contestants List -->
   <div class="card">
-    <div class="card-title" style="justify-content: space-between;">
-      <span>👥 Votos de los 17 Concursantes (Edición Inmediata)</span>
-      <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">Escribe los likes exactos de la app y haz clic en Guardar</span>
+    <div class="card-title" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+      <span>👥 Votos de los 17 Concursantes (Instagram + Facebook)</span>
+      <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">
+        Edita los likes de cada red social y el total se calculará solo
+      </span>
     </div>
     <div id="contestantsContainer"></div>
   </div>
@@ -260,12 +296,27 @@
     }
   }
 
+  function updateTotal(code) {
+    const igInput = document.querySelector(`.c-input.ig[data-code="${code}"]`);
+    const fbInput = document.querySelector(`.c-input.fb[data-code="${code}"]`);
+    const totalEl = document.getElementById(`total-${code}`);
+    if (igInput && fbInput && totalEl) {
+      const ig = parseInt(igInput.value, 10) || 0;
+      const fb = parseInt(fbInput.value, 10) || 0;
+      totalEl.textContent = (ig + fb).toLocaleString("es-CL");
+    }
+  }
+
   function renderList() {
     const container = document.getElementById("contestantsContainer");
     container.innerHTML = "";
     currentContestants.sort((a, b) => b.likes - a.likes);
 
     currentContestants.forEach((c, idx) => {
+      const ig = c.igLikes !== undefined ? c.igLikes : c.likes;
+      const fb = c.fbLikes || 0;
+      const total = ig + fb;
+
       const div = document.createElement("div");
       div.className = "contestant-item";
       div.innerHTML = `
@@ -275,9 +326,19 @@
           <div class="c-name">${c.name}</div>
           <div class="c-shortcode">${c.shortcode} • <a href="${c.url}" target="_blank" style="color:#38bdf8; text-decoration:none;">Ver post</a></div>
         </div>
-        <div class="c-input-wrap">
-          <label>Likes:</label>
-          <input type="number" class="c-input" data-code="${c.shortcode}" value="${c.likes}">
+        <div class="c-inputs-group">
+          <div class="c-input-wrap">
+            <label class="label-ig">📸 Likes IG</label>
+            <input type="number" class="c-input ig" data-code="${c.shortcode}" value="${ig}" oninput="updateTotal('${c.shortcode}')">
+          </div>
+          <div class="c-input-wrap">
+            <label class="label-fb">📘 Likes FB</label>
+            <input type="number" class="c-input fb" data-code="${c.shortcode}" value="${fb}" oninput="updateTotal('${c.shortcode}')">
+          </div>
+          <div class="c-total-wrap">
+            <div class="c-total-label">Total</div>
+            <div class="c-total-val" id="total-${c.shortcode}">${total.toLocaleString("es-CL")}</div>
+          </div>
         </div>
       `;
       container.appendChild(div);
@@ -290,14 +351,16 @@
     btn.disabled = true;
     btn.textContent = "⏳ Guardando y subiendo a Vercel...";
 
-    const inputs = document.querySelectorAll(".c-input");
-    inputs.forEach(input => {
-      const code = input.dataset.code;
-      const val = parseInt(input.value, 10);
-      const c = currentContestants.find(x => x.shortcode === code);
-      if (c && !isNaN(val)) {
-        c.likes = val;
-      }
+    currentContestants.forEach(c => {
+      const igInput = document.querySelector(`.c-input.ig[data-code="${c.shortcode}"]`);
+      const fbInput = document.querySelector(`.c-input.fb[data-code="${c.shortcode}"]`);
+      const ig = igInput ? (parseInt(igInput.value, 10) || 0) : (c.igLikes || c.likes);
+      const fb = fbInput ? (parseInt(fbInput.value, 10) || 0) : (c.fbLikes || 0);
+
+      c.igLikes = ig;
+      c.fbLikes = fb;
+      c.totalVotes = ig + fb;
+      c.likes = ig + fb;
     });
 
     try {
@@ -336,6 +399,7 @@
       if (json.success) {
         showStatus("✅ ¡Token actualizado y guardado correctamente!");
         document.getElementById("tokenInput").value = "";
+        await loadData();
       } else {
         showStatus("Error: " + json.error, false);
       }
@@ -374,4 +438,3 @@
 </script>
 </body>
 </html>
-

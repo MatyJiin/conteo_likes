@@ -4,7 +4,7 @@ const path = require('path');
 const { exec } = require('child_process');
 
 const PORT = 3000;
-let token = "EAAQ2m5P4VKUBSZBouT9THRX1b4NqxL30qSW4uB05AEERBsvL1qBZAX0wYSMuWzlfRDnaXGtSeNSrapRMVFlUDxfZBrvfkon65Wv0jII3MON88AZBrmmDxUe0oZC179wOPUH5aPuqoZCq5L1R5aaVqER6zRaoRQyDDoEqLlc20QBpZC2NbpEGzwdAoBSK0Pi71ucbZBE08UDIsLqfgh8z0dGzpqBH31dFS7wrZC35cSPCoIL5NDWv03nDvpIRRyfoydWILCKksMGrydQXizdEQUqeSXhAuPkEZD";
+let token = "EAAQ2m5P4VKUBS1t8VYhIwW3WaM4NLPGRV2oTZCo8M6c0nMIiDKip0JEHCraGZCYZBy8ZCaMPwWVn9NECTaFASZCLO2tqaFkwzBZBgTDPx1Uo1MyzkDwjpBvTc0h141ZB3DBQwDExnFftaDaOG0iZAIspS0odE7zw6uFR0ouuaaRbTKT6TYj4NmBICG5vWKgOWZBeOSc2K6aENPG1z2PxrfvG38IIUUS0zHoA7DbntwfjUNqJX1GCzJcvJXKj2KKrj5EukFhc1YGnzcAxvHqWcgNZBxg3sc";
 const igId = "17841436768752867";
 
 const namesMap = {
@@ -56,14 +56,27 @@ async function updateFromMetaApi() {
     const posts = json.data || [];
     const contestants = [];
 
+    const existingMap = {};
+    if (Array.isArray(currentData)) {
+      currentData.forEach(x => { existingMap[x.shortcode] = x; });
+    }
+
     for (const code of Object.keys(namesMap)) {
       const post = posts.find(p => p.shortcode === code);
       if (post) {
+        const prevItem = existingMap[code] || {};
+        const fbLikes = prevItem.fbLikes || 0;
+        const igLikes = post.like_count;
+        const totalVotes = igLikes + fbLikes;
+
         contestants.push({
           url: post.permalink || `https://www.instagram.com/p/${code}/`,
           shortcode: code,
           name: namesMap[code],
-          likes: post.like_count,
+          igLikes: igLikes,
+          fbLikes: fbLikes,
+          totalVotes: totalVotes,
+          likes: totalVotes,
           comments: post.comments_count,
           localImage: `fotos/${code}.jpg`,
           image: post.thumbnail_url || post.media_url || '',
